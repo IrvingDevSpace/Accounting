@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using Accounting.Components;
+using System.Windows.Forms;
 
 namespace Accounting.Forms
 {
@@ -9,5 +10,6 @@ namespace Accounting.Forms
             InitializeComponent();
             this.StartPosition = FormStartPosition.CenterScreen;
         }
+
     }
 }

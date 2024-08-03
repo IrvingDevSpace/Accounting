@@ -15,12 +15,6 @@ namespace Accounting.Components
         {
             InitializeComponent();
             AddEvent();
-            List<Type> formTypes = GetFormTypes();
-            for (int i = 0; i < formTypes.Count; i++)
-            {
-                Button btn = this.Controls.Find(formTypes[i].Name.Replace("Form", "Button"), true)[0] as Button;
-                btn.Enabled = btn.Name != Singleton.FormName.Replace("Form", "Button");
-            }
         }
 
         private void AddEvent()
@@ -44,6 +38,12 @@ namespace Accounting.Components
             String formName = button.Name.Replace("Button", "Form");
             Enum.TryParse(formName, out FormsTag formsTag);
             Singleton.GetForm(formsTag).Show();
+        }
+
+        public void SetButton(FormsTag formsTag)
+        {
+            Button btn = this.Controls.Find(formsTag.ToString().Replace("Form", "Button"), true)[0] as Button;
+            btn.Enabled = false;
         }
     }
 }

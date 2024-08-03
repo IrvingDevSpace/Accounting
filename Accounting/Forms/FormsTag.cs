@@ -1,6 +1,6 @@
 ﻿namespace Accounting.Forms
 {
-    internal enum FormsTag
+    public enum FormsTag
     {
         AddAccountingForm = 0,
         AccountForm = 1,

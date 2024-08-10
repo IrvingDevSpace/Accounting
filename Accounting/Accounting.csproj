@@ -70,13 +70,20 @@
     <Compile Include="Forms\AddAccountingForm.Designer.cs">
       <DependentUpon>AddAccountingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\FormExtension.cs" />
+    <Compile Include="Forms\SelectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SelectForm.Designer.cs">
+      <DependentUpon>SelectForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ChartForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\ChartForm.Designer.cs">
       <DependentUpon>ChartForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FormsTag.cs" />
+    <Compile Include="SingletonUtils\NavbarAttribute.cs" />
     <Compile Include="SingletonUtils\Singleton.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -91,6 +98,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddAccountingForm.resx">
       <DependentUpon>AddAccountingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SelectForm.resx">
+      <DependentUpon>SelectForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ChartForm.resx">
       <DependentUpon>ChartForm.cs</DependentUpon>

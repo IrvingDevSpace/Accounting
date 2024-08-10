@@ -1,5 +1,4 @@
-﻿using Accounting.Forms;
-using Accounting.SingletonUtils;
+﻿using Accounting.SingletonUtils;
 using System;
 using System.Windows.Forms;
 
@@ -15,7 +14,7 @@ namespace Accounting
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(Singleton.GetForm(FormsTag.AddAccountingForm));
+            Application.Run(Singleton.GetForm("AddAccountingForm"));
         }
     }
 }

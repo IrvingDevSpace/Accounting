@@ -5,12 +5,12 @@ using System.Windows.Forms;
 
 namespace Accounting.Forms
 {
-    [Navbar("記帳本")]
-    public partial class AccountingBookForm : Form
+    [Navbar("查詢")]
+    public partial class SelectForm : Form
     {
         private Navbar navbar;
 
-        public AccountingBookForm()
+        public SelectForm()
         {
             InitializeComponent();
             this.Text = this.GetFormTitle();
@@ -21,11 +21,11 @@ namespace Accounting.Forms
 
         private void AddEvent()
         {
-            this.Load += AccountingBookForm_Load;
-            this.FormClosed += AccountingBookForm_FormClosed;
+            this.Load += SelectForm_Load;
+            this.FormClosed += SelectForm_FormClosed;
         }
 
-        private void AccountingBookForm_Load(object sender, System.EventArgs e)
+        private void SelectForm_Load(object sender, System.EventArgs e)
         {
             navbar = new Navbar
             {
@@ -37,7 +37,7 @@ namespace Accounting.Forms
             this.SetFormsNavbarButton();
         }
 
-        private void AccountingBookForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void SelectForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Environment.Exit(0);
         }

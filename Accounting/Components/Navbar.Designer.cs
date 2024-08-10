@@ -28,71 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.AddAccountingButton = new System.Windows.Forms.Button();
-            this.AccountButton = new System.Windows.Forms.Button();
-            this.AccountingBookButton = new System.Windows.Forms.Button();
-            this.ChartButton = new System.Windows.Forms.Button();
+            this.FlowLayoutPanel_Buttons = new System.Windows.Forms.FlowLayoutPanel();
             this.SuspendLayout();
             // 
-            // AddAccountingButton
+            // FlowLayoutPanel_Buttons
             // 
-            this.AddAccountingButton.Location = new System.Drawing.Point(25, 10);
-            this.AddAccountingButton.Name = "AddAccountingButton";
-            this.AddAccountingButton.Size = new System.Drawing.Size(120, 50);
-            this.AddAccountingButton.TabIndex = 0;
-            this.AddAccountingButton.TabStop = false;
-            this.AddAccountingButton.Text = "記一筆";
-            this.AddAccountingButton.UseVisualStyleBackColor = true;
-            // 
-            // AccountButton
-            // 
-            this.AccountButton.Location = new System.Drawing.Point(175, 10);
-            this.AccountButton.Name = "AccountButton";
-            this.AccountButton.Size = new System.Drawing.Size(120, 50);
-            this.AccountButton.TabIndex = 0;
-            this.AccountButton.TabStop = false;
-            this.AccountButton.Text = "帳戶";
-            this.AccountButton.UseVisualStyleBackColor = true;
-            // 
-            // AccountingBookButton
-            // 
-            this.AccountingBookButton.Location = new System.Drawing.Point(325, 10);
-            this.AccountingBookButton.Name = "AccountingBookButton";
-            this.AccountingBookButton.Size = new System.Drawing.Size(120, 50);
-            this.AccountingBookButton.TabIndex = 0;
-            this.AccountingBookButton.TabStop = false;
-            this.AccountingBookButton.Text = "記帳本";
-            this.AccountingBookButton.UseVisualStyleBackColor = true;
-            // 
-            // ChartButton
-            // 
-            this.ChartButton.Location = new System.Drawing.Point(475, 10);
-            this.ChartButton.Name = "ChartButton";
-            this.ChartButton.Size = new System.Drawing.Size(120, 50);
-            this.ChartButton.TabIndex = 0;
-            this.ChartButton.TabStop = false;
-            this.ChartButton.Text = "圖表分析";
-            this.ChartButton.UseVisualStyleBackColor = true;
+            this.FlowLayoutPanel_Buttons.AutoScroll = true;
+            this.FlowLayoutPanel_Buttons.Location = new System.Drawing.Point(2, 2);
+            this.FlowLayoutPanel_Buttons.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.FlowLayoutPanel_Buttons.Name = "FlowLayoutPanel_Buttons";
+            this.FlowLayoutPanel_Buttons.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.FlowLayoutPanel_Buttons.Size = new System.Drawing.Size(363, 53);
+            this.FlowLayoutPanel_Buttons.TabIndex = 0;
             // 
             // Navbar
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.ChartButton);
-            this.Controls.Add(this.AccountingBookButton);
-            this.Controls.Add(this.AccountButton);
-            this.Controls.Add(this.AddAccountingButton);
+            this.Controls.Add(this.FlowLayoutPanel_Buttons);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "Navbar";
-            this.Size = new System.Drawing.Size(620, 70);
+            this.Size = new System.Drawing.Size(367, 57);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Button AddAccountingButton;
-        private System.Windows.Forms.Button AccountButton;
-        private System.Windows.Forms.Button AccountingBookButton;
-        private System.Windows.Forms.Button ChartButton;
+        private System.Windows.Forms.FlowLayoutPanel FlowLayoutPanel_Buttons;
     }
 }

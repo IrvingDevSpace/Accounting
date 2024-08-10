@@ -1,6 +1,6 @@
 ﻿namespace Accounting.Forms
 {
-    partial class AccountForm
+    partial class SelectForm
     {
         /// <summary>
         /// Required designer variable.
@@ -30,14 +30,14 @@
         {
             this.SuspendLayout();
             // 
-            // AccountForm
+            // SelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(452, 429);
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "AccountForm";
-            this.Text = "AccountForm";
+            this.Name = "SelectForm";
+            this.Text = "SelectForm";
             this.ResumeLayout(false);
 
         }

@@ -26,6 +26,7 @@ namespace Accounting.Components
         private List<Type> GetFormTypes()
         {
             String namespaceName = "Accounting.Forms";
+            //List<Type> formTypes = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.FullName.Contains(namespaceName) && !x.FullName.Contains("Extension")).ToList();
             List<Type> formTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == namespaceName && t.IsSubclassOf(typeof(Form))).ToList();
             return formTypes;
         }

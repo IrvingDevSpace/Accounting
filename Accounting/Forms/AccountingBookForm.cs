@@ -5,6 +5,7 @@ using CSV;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -50,10 +51,34 @@ namespace Accounting.Forms
         private void button1_Click(object sender, EventArgs e)
         {
             String fileServerPath = "C:\\Users\\IRVING\\Program Course\\Code\\Accounting\\FileServer\\";
-            List<AddAccountingInfo> addAccountingInfos = CSVHelper.Read<AddAccountingInfo>($"{fileServerPath}Data.csv");
+            int diffDays = (DateTimePicker_End.Value - DateTimePicker_Start.Value).Days + 1;
+            if (diffDays < 1)
+                return;
+            List<String> directories = Directory.GetDirectories(fileServerPath).ToList();
+            List<String> containDirectories = new List<String>();
+            List<AddAccountingInfo> addAccountingInfos = new List<AddAccountingInfo>();
+            for (int i = 0; i < diffDays; i++)
+            {
+                String directoryName = $"{fileServerPath}{DateTimePicker_Start.Value.AddDays(i).ToString("yyyy-MM-dd")}";
+                foreach (var directory in directories)
+                {
+                    if (directory == directoryName)
+                    {
+                        addAccountingInfos.AddRange(CSVHelper.Read<AddAccountingInfo>($"{directoryName}\\Data.csv"));
+                        break;
+                    }
+                }
+            }
+
+            dataGridView1.Columns.Clear();
+            dataGridView1.DataSource = null;
+
+            GC.Collect();
             dataGridView1.DataSource = addAccountingInfos;
             dataGridView1.Columns["ImagePath1"].Visible = false;
             dataGridView1.Columns["ImagePath2"].Visible = false;
+            dataGridView1.Columns["ImagePathCompression1"].Visible = false;
+            dataGridView1.Columns["ImagePathCompression2"].Visible = false;
 
             DataGridViewImageColumn imgCol1 = new DataGridViewImageColumn();
             imgCol1.Name = "ImageColumnPath1";
@@ -70,25 +95,36 @@ namespace Accounting.Forms
 
             for (int i = 0; i < addAccountingInfos.Count; i++)
             {
-                if (System.IO.File.Exists(addAccountingInfos[i].ImagePath1))
+                if (File.Exists(addAccountingInfos[i].ImagePath1))
                 {
                     Image img = Image.FromFile(addAccountingInfos[i].ImagePath1);
                     dataGridView1.Rows[i].Cells["ImageColumnPath1"].Value = img;
+                    dataGridView1.Rows[i].Cells["ImageColumnPath1"].Tag = addAccountingInfos[i].ImagePathCompression1;
                 }
                 else
                     dataGridView1.Rows[i].Cells["ImageColumnPath1"].Value = null;
 
-                if (System.IO.File.Exists(addAccountingInfos[i].ImagePath2))
+                if (File.Exists(addAccountingInfos[i].ImagePath2))
                 {
                     Image img = Image.FromFile(addAccountingInfos[i].ImagePath2);
                     dataGridView1.Rows[i].Cells["ImageColumnPath2"].Value = img;
+                    dataGridView1.Rows[i].Cells["ImageColumnPath2"].Tag = addAccountingInfos[i].ImagePathCompression2;
                 }
                 else
                     dataGridView1.Rows[i].Cells["ImageColumnPath2"].Value = null;
             }
         }
 
-
-        // 準備10張4K壁紙 20M 越清楚越好
+        private void dataGridView1_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dataGridView = sender as DataGridView;
+            String filePath = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Tag.ToString();
+            if (String.IsNullOrEmpty(filePath))
+                return;
+            if (!File.Exists(filePath))
+                return;
+            ShowImgForm showImgForm = new ShowImgForm(filePath);
+            showImgForm.ShowDialog();
+        }
     }
 }

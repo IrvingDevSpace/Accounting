@@ -33,5 +33,9 @@ namespace Accounting.Model
 
         [DisplayName("發票圖檔2")]
         public String ImagePath2 { get; set; }
+
+        public String ImagePathCompression1 { get; set; }
+
+        public String ImagePathCompression2 { get; set; }
     }
 }

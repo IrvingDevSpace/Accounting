@@ -1,10 +1,12 @@
 ﻿using Accounting.Components;
 using Accounting.Model;
 using Accounting.SingletonUtils;
+using Accounting.Utility;
 using CSV;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -114,11 +116,19 @@ namespace Accounting.Forms
             String purpose = ComboBox_Purpose.Text;
             String who = ComboBox_Who.Text;
             String payment = ComboBox_Payment.Text;
+            String directoryPath = Path.GetDirectoryName($"{fileServerPath}\\{time}\\");
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
 
-            String imgPath1 = $"{fileServerPath}{Guid.NewGuid().ToString()}_imgPath1.png";
-            String imgPath2 = $"{fileServerPath}{Guid.NewGuid().ToString()}_imgPath2.png";
-            pictureBox1.Image.Save(imgPath1);
-            pictureBox2.Image.Save(imgPath2);
+            String imgPathResize1 = $"{directoryPath}\\{Guid.NewGuid().ToString()}_imgPathResize1.jpg";
+            String imgPathResize2 = $"{directoryPath}\\{Guid.NewGuid().ToString()}_imgPathResize2.jpg";
+            String imgPathCompression1 = $"{directoryPath}\\{Guid.NewGuid().ToString()}_imgPathCompression1.jpg";
+            String imgPathCompression2 = $"{directoryPath}\\{Guid.NewGuid().ToString()}_imgPathCompression2.jpg";
+
+            ImageEncoder.ImageResizeAndSave((Bitmap)pictureBox1.Image.Clone(), imgPathResize1);
+            ImageEncoder.ImageResizeAndSave((Bitmap)pictureBox2.Image.Clone(), imgPathResize2);
+            ImageEncoder.CompressionAndSave((Bitmap)pictureBox1.Image.Clone(), imgPathCompression1, 1L);
+            ImageEncoder.CompressionAndSave((Bitmap)pictureBox2.Image.Clone(), imgPathCompression2, 1L);
 
             AddAccountingInfo addAccountingInfo = new AddAccountingInfo
             {
@@ -128,11 +138,14 @@ namespace Accounting.Forms
                 Purpose = purpose,
                 Who = who,
                 Payment = payment,
-                ImagePath1 = imgPath1,
-                ImagePath2 = imgPath2
+                ImagePath1 = imgPathResize1,
+                ImagePath2 = imgPathResize2,
+                ImagePathCompression1 = imgPathCompression1,
+                ImagePathCompression2 = imgPathCompression2
             };
 
-            CSVHelper.Write($"{fileServerPath}Data.csv", addAccountingInfo);
+            CSVHelper.Write($"{directoryPath}\\Data.csv", addAccountingInfo);
+            MessageBox.Show("儲存成功", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

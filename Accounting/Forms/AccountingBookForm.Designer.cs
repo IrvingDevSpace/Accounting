@@ -30,8 +30,11 @@
         {
             this.button1 = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.navbar1 = new Accounting.Components.Navbar();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.DateTimePicker_Start = new System.Windows.Forms.DateTimePicker();
+            this.label1 = new System.Windows.Forms.Label();
+            this.DateTimePicker_End = new System.Windows.Forms.DateTimePicker();
+            this.navbar1 = new Accounting.Components.Navbar();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,13 +57,7 @@
             this.dataGridView1.RowTemplate.Height = 31;
             this.dataGridView1.Size = new System.Drawing.Size(1051, 458);
             this.dataGridView1.TabIndex = 1;
-            // 
-            // navbar1
-            // 
-            this.navbar1.Location = new System.Drawing.Point(25, 553);
-            this.navbar1.Name = "navbar1";
-            this.navbar1.Size = new System.Drawing.Size(550, 86);
-            this.navbar1.TabIndex = 2;
+            this.dataGridView1.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentDoubleClick);
             // 
             // textBox1
             // 
@@ -69,11 +66,44 @@
             this.textBox1.Size = new System.Drawing.Size(230, 29);
             this.textBox1.TabIndex = 3;
             // 
+            // DateTimePicker_Start
+            // 
+            this.DateTimePicker_Start.Location = new System.Drawing.Point(431, 32);
+            this.DateTimePicker_Start.Name = "DateTimePicker_Start";
+            this.DateTimePicker_Start.Size = new System.Drawing.Size(197, 29);
+            this.DateTimePicker_Start.TabIndex = 5;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(354, 39);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(44, 18);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "日期";
+            // 
+            // DateTimePicker_End
+            // 
+            this.DateTimePicker_End.Location = new System.Drawing.Point(650, 32);
+            this.DateTimePicker_End.Name = "DateTimePicker_End";
+            this.DateTimePicker_End.Size = new System.Drawing.Size(197, 29);
+            this.DateTimePicker_End.TabIndex = 6;
+            // 
+            // navbar1
+            // 
+            this.navbar1.Location = new System.Drawing.Point(25, 553);
+            this.navbar1.Name = "navbar1";
+            this.navbar1.Size = new System.Drawing.Size(550, 86);
+            this.navbar1.TabIndex = 2;
+            // 
             // AccountingBookForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1089, 689);
+            this.Controls.Add(this.DateTimePicker_End);
+            this.Controls.Add(this.DateTimePicker_Start);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.navbar1);
             this.Controls.Add(this.dataGridView1);
@@ -92,5 +122,8 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private Components.Navbar navbar1;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.DateTimePicker DateTimePicker_Start;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DateTimePicker DateTimePicker_End;
     }
 }

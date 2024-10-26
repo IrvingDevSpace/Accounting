@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Accounting.Model
+namespace Accounting.Models
 {
     public class AddAccountingInfo
     {
@@ -23,7 +18,7 @@ namespace Accounting.Model
         public String Purpose { get; set; }
 
         [DisplayName("對象")]
-        public String Who { get; set; }
+        public String Companion { get; set; }
 
         [DisplayName("付款方式")]
         public String Payment { get; set; }

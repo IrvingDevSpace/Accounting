@@ -25,7 +25,7 @@ namespace Accounting.Components
 
         private List<Type> GetFormTypes()
         {
-            String namespaceName = "Accounting.Forms";
+            String namespaceName = "Accounting.Forms.AccountingFoms";
             //List<Type> formTypes = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.FullName.Contains(namespaceName) && !x.FullName.Contains("Extension")).ToList();
             List<Type> formTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == namespaceName && t.IsSubclassOf(typeof(Form))).ToList();
             return formTypes;
@@ -52,7 +52,7 @@ namespace Accounting.Components
             List<Type> formNames = GetFormTypes();
             for (int i = 0; i < formNames.Count; i++)
             {
-                Type formType = Type.GetType("Accounting.Forms." + formNames[i].Name);
+                Type formType = Type.GetType("Accounting.Forms.AccountingFoms." + formNames[i].Name);
                 NavbarAttribute attribute = (NavbarAttribute)Attribute.GetCustomAttribute(formType, typeof(NavbarAttribute));
                 String formName = attribute?.FormName ?? throw new Exception($"{formType.Name} NavbarAttribute FormName not exist.");
                 Button button = new Button

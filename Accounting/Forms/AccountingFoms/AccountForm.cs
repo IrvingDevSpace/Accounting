@@ -3,7 +3,7 @@ using Accounting.SingletonUtils;
 using System;
 using System.Windows.Forms;
 
-namespace Accounting.Forms
+namespace Accounting.Forms.AccountingFoms
 {
     [Navbar("帳戶")]
     public partial class AccountForm : Form

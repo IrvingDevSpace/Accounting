@@ -1,20 +1,15 @@
 ﻿using Accounting.Components;
-using Accounting.Model;
+using Accounting.Models;
 using Accounting.SingletonUtils;
 using Accounting.Utility;
 using CSV;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
-namespace Accounting.Forms
+namespace Accounting.Forms.AccountingFoms
 {
     [Navbar("記一筆")]
     public partial class AddAccountingForm : Form
@@ -49,16 +44,12 @@ namespace Accounting.Forms
             this.Controls.Add(navbar);
             this.SetFormsNavbarButton();
 
-
-            ComboBox_Type.Items.Add("交通");
-            ComboBox_Type.Items.Add("飲食");
-            ComboBox_Type.Items.Add("娛樂");
-            ComboBox_Who.Items.Add("自己");
-            ComboBox_Who.Items.Add("家人");
-            ComboBox_Who.Items.Add("朋友");
-            ComboBox_Payment.Items.Add("現金");
-            ComboBox_Payment.Items.Add("信用卡");
-            ComboBox_Payment.Items.Add("電子支付");
+            foreach (var type in SelectItemInfo.Types.Keys)
+                ComboBox_Type.Items.Add(type);
+            foreach (var companion in SelectItemInfo.Companions)
+                ComboBox_Companion.Items.Add(companion);
+            foreach (var payment in SelectItemInfo.Payments)
+                ComboBox_Payment.Items.Add(payment);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
         }
@@ -72,27 +63,12 @@ namespace Accounting.Forms
         {
             ComboBox comboBox = (ComboBox)sender;
             String typeName = comboBox.Text;
+            if (!SelectItemInfo.Types.TryGetValue(typeName, out List<string> values))
+                return;
             ComboBox_Purpose.Items.Clear();
-            switch (typeName)
-            {
-                case "交通":
-                    ComboBox_Purpose.Items.Add("油費");
-                    ComboBox_Purpose.Items.Add("火車");
-                    ComboBox_Purpose.Items.Add("捷運");
-                    break;
-                case "飲食":
-                    ComboBox_Purpose.Items.Add("早餐");
-                    ComboBox_Purpose.Items.Add("午餐");
-                    ComboBox_Purpose.Items.Add("晚餐");
-                    break;
-                case "娛樂":
-                    ComboBox_Purpose.Items.Add("唱歌");
-                    ComboBox_Purpose.Items.Add("購物");
-                    ComboBox_Purpose.Items.Add("運動");
-                    break;
-                default:
-                    break;
-            }
+            foreach (var value in values)
+                ComboBox_Purpose.Items.Add(value);
+            ComboBox_Purpose.Text = ComboBox_Purpose.Items[0].ToString();
         }
 
         private void pictureBox_Click(object sender, EventArgs e)
@@ -114,7 +90,7 @@ namespace Accounting.Forms
             String amount = textBox1.Text;
             String type = ComboBox_Type.Text;
             String purpose = ComboBox_Purpose.Text;
-            String who = ComboBox_Who.Text;
+            String who = ComboBox_Companion.Text;
             String payment = ComboBox_Payment.Text;
             String directoryPath = Path.GetDirectoryName($"{fileServerPath}\\{time}\\");
             if (!Directory.Exists(directoryPath))
@@ -136,7 +112,7 @@ namespace Accounting.Forms
                 Amount = amount,
                 Type = type,
                 Purpose = purpose,
-                Who = who,
+                Companion = who,
                 Payment = payment,
                 ImagePath1 = imgPathResize1,
                 ImagePath2 = imgPathResize2,

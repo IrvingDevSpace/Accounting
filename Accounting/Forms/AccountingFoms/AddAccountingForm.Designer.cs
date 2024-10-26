@@ -1,4 +1,4 @@
-﻿namespace Accounting.Forms
+﻿namespace Accounting.Forms.AccountingFoms
 {
     partial class AddAccountingForm
     {
@@ -35,7 +35,7 @@
             this.ComboBox_Type = new System.Windows.Forms.ComboBox();
             this.ComboBox_Purpose = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.ComboBox_Who = new System.Windows.Forms.ComboBox();
+            this.ComboBox_Companion = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.ComboBox_Payment = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -107,12 +107,12 @@
             // 
             // ComboBox_Who
             // 
-            this.ComboBox_Who.FormattingEnabled = true;
-            this.ComboBox_Who.Location = new System.Drawing.Point(69, 190);
-            this.ComboBox_Who.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.ComboBox_Who.Name = "ComboBox_Who";
-            this.ComboBox_Who.Size = new System.Drawing.Size(137, 20);
-            this.ComboBox_Who.TabIndex = 7;
+            this.ComboBox_Companion.FormattingEnabled = true;
+            this.ComboBox_Companion.Location = new System.Drawing.Point(69, 190);
+            this.ComboBox_Companion.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ComboBox_Companion.Name = "ComboBox_Who";
+            this.ComboBox_Companion.Size = new System.Drawing.Size(137, 20);
+            this.ComboBox_Companion.TabIndex = 7;
             // 
             // label4
             // 
@@ -204,7 +204,7 @@
             this.Controls.Add(this.label6);
             this.Controls.Add(this.ComboBox_Payment);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.ComboBox_Who);
+            this.Controls.Add(this.ComboBox_Companion);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.ComboBox_Purpose);
             this.Controls.Add(this.label3);
@@ -230,7 +230,7 @@
         private System.Windows.Forms.ComboBox ComboBox_Type;
         private System.Windows.Forms.ComboBox ComboBox_Purpose;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox ComboBox_Who;
+        private System.Windows.Forms.ComboBox ComboBox_Companion;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox ComboBox_Payment;
         private System.Windows.Forms.Label label5;

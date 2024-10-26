@@ -1,4 +1,4 @@
-﻿namespace Accounting.Forms
+﻿namespace Accounting.Forms.AccountingFoms
 {
     partial class AccountForm
     {

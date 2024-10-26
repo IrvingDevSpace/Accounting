@@ -5,9 +5,11 @@ using Accounting.SingletonUtils;
 using CSV;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Accounting.Forms.AccountingFoms
@@ -253,86 +255,6 @@ namespace Accounting.Forms.AccountingFoms
             }
         }
 
-        private void DataGridView_AccountingInfo_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
-        {
-            DataGridView dataGridView = sender as DataGridView;
-            if (dataGridView.CurrentCell.OwningColumn.Name == "comboBoxColumnType" && e.Control is ComboBox typeComboBox)
-            {
-                typeComboBox.Tag = dataGridView.CurrentCell;
-                typeComboBox.SelectedIndexChanged += TypeComboBox_SelectedIndexChanged;
-            }
-            if (dataGridView.CurrentCell.OwningColumn.Name == "comboBoxColumnPurpose" && e.Control is ComboBox purposeComboBox)
-            {
-                purposeComboBox.Tag = dataGridView.CurrentCell;
-                purposeComboBox.SelectedIndexChanged += PurposeComboBox_SelectedIndexChanged;
-            }
-            if (dataGridView.CurrentCell.OwningColumn.Name == "comboBoxColumnCompanion" && e.Control is ComboBox companionComboBox)
-            {
-                companionComboBox.Tag = dataGridView.CurrentCell;
-                companionComboBox.SelectedIndexChanged += CompanionComboBox_SelectedIndexChanged;
-            }
-            if (dataGridView.CurrentCell.OwningColumn.Name == "comboBoxColumnPayment" && e.Control is ComboBox paymentComboBox)
-            {
-                paymentComboBox.Tag = dataGridView.CurrentCell;
-                paymentComboBox.SelectedIndexChanged += PaymentComboBox_SelectedIndexChanged;
-            }
-        }
-
-        private void TypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            if (!(comboBox.Tag is DataGridViewCell currentCell))
-                return;
-            DataGridView dataGridView = currentCell.DataGridView;
-            int rowIndex = currentCell.RowIndex;
-            if (!(dataGridView.Rows[rowIndex].Cells["comboBoxColumnPurpose"] is DataGridViewComboBoxCell purposeComboBoxCell))
-                return;
-            if (!SelectItemInfo.Types.TryGetValue(comboBox.Text, out List<string> values))
-                return;
-            purposeComboBoxCell.Value = null;
-            purposeComboBoxCell.Items.Clear();
-            foreach (var value in values)
-                purposeComboBoxCell.Items.Add(value);
-            purposeComboBoxCell.Value = purposeComboBoxCell.Items[0];
-            if (dataGridView.Rows[rowIndex].Cells["Purpose"] is DataGridViewTextBoxCell purposeTextBoxCell)
-                purposeTextBoxCell.Value = purposeComboBoxCell.Value;
-            if (dataGridView.Rows[rowIndex].Cells["Type"] is DataGridViewTextBoxCell textBoxCell)
-                textBoxCell.Value = comboBox.Text;
-        }
-
-        private void PurposeComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            if (!(comboBox.Tag is DataGridViewCell currentCell))
-                return;
-            DataGridView dataGridView = currentCell.DataGridView;
-            int rowIndex = currentCell.RowIndex;
-            if (dataGridView.Rows[rowIndex].Cells["Purpose"] is DataGridViewTextBoxCell textBoxCell)
-                textBoxCell.Value = comboBox.Text;
-        }
-
-        private void CompanionComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            if (!(comboBox.Tag is DataGridViewCell currentCell))
-                return;
-            DataGridView dataGridView = currentCell.DataGridView;
-            int rowIndex = currentCell.RowIndex;
-            if (dataGridView.Rows[rowIndex].Cells["Companion"] is DataGridViewTextBoxCell textBoxCell)
-                textBoxCell.Value = comboBox.Text;
-        }
-
-        private void PaymentComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            if (!(comboBox.Tag is DataGridViewCell currentCell))
-                return;
-            DataGridView dataGridView = currentCell.DataGridView;
-            int rowIndex = currentCell.RowIndex;
-            if (dataGridView.Rows[rowIndex].Cells["Payment"] is DataGridViewTextBoxCell textBoxCell)
-                textBoxCell.Value = comboBox.Text;
-        }
-
         private void DataGridView_AccountingInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dataGridView = sender as DataGridView;
@@ -340,6 +262,38 @@ namespace Accounting.Forms.AccountingFoms
                 return;
             if (!(dataGridView.DataSource is List<AddAccountingInfo> addAccountingInfos))
                 return;
+            string columnName = dataGridView.Columns[e.ColumnIndex].Name;
+            if (columnName == "comboBoxColumnType")
+            {
+                if (dataGridView.Rows[e.RowIndex].Cells["comboBoxColumnPurpose"] is DataGridViewComboBoxCell comboBoxPurposeCell)
+                {
+                    comboBoxPurposeCell.Value = null;
+                    comboBoxPurposeCell.Items.Clear();
+                    if (SelectItemInfo.Types.TryGetValue(dataGridView.Rows[e.RowIndex].Cells[columnName].Value.ToString(), out List<string> values))
+                    {
+                        comboBoxPurposeCell.Items.Clear();
+                        foreach (var value in values)
+                            comboBoxPurposeCell.Items.Add(value);
+                        comboBoxPurposeCell.Value = comboBoxPurposeCell.Items[0];
+                        dataGridView.Rows[e.RowIndex].Cells["Purpose"].Value = comboBoxPurposeCell.Value;
+                    }
+                }
+            }
+
+            PropertyInfo[] propertyInfos = typeof(AddAccountingInfo).GetProperties();
+            for (int i = 0; i < propertyInfos.Length; i++)
+            {
+                String description = propertyInfos[i].GetCustomAttribute<DescriptionAttribute>()?.Description;
+                if (description != null)
+                {
+                    if (description == columnName)
+                    {
+                        dataGridView.Rows[e.RowIndex].Cells[propertyInfos[i].Name].Value = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                        break;
+                    }
+                }
+            }
+
             String time = dataGridView.Rows[e.RowIndex].Cells["Time"].Value.ToString();
             addAccountingInfos = addAccountingInfos.Where(x => x.Time == time).ToList();
             String directoryPath = Path.GetDirectoryName($"{fileServerPath}\\{time}\\");

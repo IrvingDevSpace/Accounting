@@ -33,7 +33,6 @@
             this.DateTimePicker_Start = new System.Windows.Forms.DateTimePicker();
             this.label1 = new System.Windows.Forms.Label();
             this.DateTimePicker_End = new System.Windows.Forms.DateTimePicker();
-            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.DataGridView_AccountingInfo)).BeginInit();
             this.SuspendLayout();
             // 
@@ -83,21 +82,11 @@
             this.DateTimePicker_End.Size = new System.Drawing.Size(197, 29);
             this.DateTimePicker_End.TabIndex = 6;
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(60, 35);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
             // AccountingBookForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1089, 689);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(1104, 689);
             this.Controls.Add(this.DateTimePicker_End);
             this.Controls.Add(this.DateTimePicker_Start);
             this.Controls.Add(this.label1);
@@ -118,6 +107,5 @@
         private System.Windows.Forms.DateTimePicker DateTimePicker_Start;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DateTimePicker DateTimePicker_End;
-        private System.Windows.Forms.Button button1;
     }
 }

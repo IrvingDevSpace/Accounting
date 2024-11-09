@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Windows.Forms;
 
-namespace Accounting.Extenstion
+namespace Accounting.Extension
 {
-    internal static class FormExtenstion
+    internal static class FormExtension
     {
         private static System.Threading.Timer timer;
 

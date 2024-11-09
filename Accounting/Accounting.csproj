@@ -73,7 +73,9 @@
     <Compile Include="Components\Navbar.Designer.cs">
       <DependentUpon>Navbar.cs</DependentUpon>
     </Compile>
-    <Compile Include="Extenstion\FormExtenstion.cs" />
+    <Compile Include="Contract\AccountingDataContract.cs" />
+    <Compile Include="Extension\DataGridViewExtension.cs" />
+    <Compile Include="Extension\FormExtension.cs" />
     <Compile Include="Forms\AccountingFoms\AccountForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -99,7 +101,11 @@
     <Compile Include="Forms\AccountingFoms\ChartForm.Designer.cs">
       <DependentUpon>ChartForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\SearchDate.cs" />
     <Compile Include="Models\SelectItemInfo.cs" />
+    <Compile Include="Presenter\AccountingDataPresenter.cs" />
+    <Compile Include="Repositories\Implementations\AddAccountingInfoRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IAddAccountingInfoRepository.cs" />
     <Compile Include="ShowImgForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -1,9 +1,14 @@
 ﻿using Accounting.Components;
+using Accounting.Extension;
+using Accounting.Models;
 using Accounting.SingletonUtils;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
-namespace Accounting.Forms
+namespace Accounting.Forms.AccountingFoms
 {
     [Navbar("圖表分析")]
     public partial class ChartForm : Form
@@ -35,6 +40,22 @@ namespace Accounting.Forms
             };
             this.Controls.Add(navbar);
             this.SetFormsNavbarButton();
+
+            List<ChartParam> chartParams = new List<ChartParam>();
+            ChartParam chartParam = new ChartParam
+            {
+                Name = "Test",
+                LegendName = "Legend",
+                ChartType = SeriesChartType.Pie,
+                ChartDashStyle = ChartDashStyle.NotSet,
+                BorderWidth = 1,
+                BorderColor = Color.Black,
+                XValueType = ChartValueType.Auto,
+                YValueType = ChartValueType.Auto,
+            };
+            chartParams.Add(chartParam);
+            chart1.ChartCreate(chartParams, "TestChart", new Font("Microsoft JhengHei", 8, FontStyle.Bold), "Time", "Temp (℃)", Double.NaN, Double.NaN);
+            chart1.Series["Test"].Points.AddXY(1, 2);
         }
 
         private void ChartForm_FormClosed(object sender, FormClosedEventArgs e)

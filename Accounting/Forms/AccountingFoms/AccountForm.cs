@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Windows.Forms;
 using static Accounting.Contract.AccountingDataContract;
@@ -42,12 +43,76 @@ namespace Accounting.Forms.AccountingFoms
         {
             navbar = new Navbar
             {
-                Location = new System.Drawing.Point(43, 361),
+                Location = new System.Drawing.Point(623, 363),
                 Name = "Navbar_ChangeForm",
                 Size = new System.Drawing.Size(550, 70)
             };
             this.Controls.Add(navbar);
             this.SetFormsNavbarButton();
+            CreateCheckBoxes(FLP_Where);
+            CreateCheckBoxes2(FLP_OrderBy);
+        }
+
+        private void CreateCheckBoxes(FlowLayoutPanel f)
+        {
+            List<CheckBox> checkBoxes = new List<CheckBox>();
+            foreach (var type in SelectItemInfo.Types)
+            {
+                checkBoxes = new List<CheckBox>();
+                FlowLayoutPanel panel = new FlowLayoutPanel { Size = new Size(300, 21) };
+                CheckBox keyCheckBox = new CheckBox { Text = type.Key, AutoSize = true, Tag = type.Key };
+                keyCheckBox.CheckedChanged += CheckBox_CheckedChanged;
+                checkBoxes.Add(keyCheckBox);
+                foreach (var item in type.Value)
+                {
+                    CheckBox valCheckBox = new CheckBox { Text = item, AutoSize = true, Tag = type.Key };
+                    valCheckBox.CheckedChanged += CheckBox_CheckedChanged;
+                    checkBoxes.Add(valCheckBox);
+                }
+                panel.Controls.AddRange(checkBoxes.ToArray());
+                f.Controls.Add(panel);
+            }
+            checkBoxes = new List<CheckBox>();
+            CheckBox c1 = new CheckBox { Text = "對象", AutoSize = true, Tag = "對象" };
+            c1.CheckedChanged += CheckBox_CheckedChanged;
+            checkBoxes.Add(c1);
+            foreach (var companion in SelectItemInfo.Companions)
+            {
+                CheckBox checkBox = new CheckBox { Text = companion, AutoSize = true, Tag = "對象" };
+                checkBox.CheckedChanged += CheckBox_CheckedChanged;
+                checkBoxes.Add(checkBox);
+            }
+            FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel { Size = new Size(300, 21) };
+            flowLayoutPanel.Controls.AddRange(checkBoxes.ToArray());
+            f.Controls.Add(flowLayoutPanel);
+            checkBoxes = new List<CheckBox>();
+            CheckBox c2 = new CheckBox { Text = "付款方式", AutoSize = true, Tag = "付款方式" };
+            c2.CheckedChanged += CheckBox_CheckedChanged;
+            checkBoxes.Add(c2);
+            foreach (var payment in SelectItemInfo.Payments)
+            {
+                CheckBox checkBox = new CheckBox { Text = payment, AutoSize = true, Tag = "付款方式" };
+                checkBox.CheckedChanged += CheckBox_CheckedChanged;
+                checkBoxes.Add(checkBox);
+            }
+            flowLayoutPanel = new FlowLayoutPanel { Size = new Size(300, 21) };
+            flowLayoutPanel.Controls.AddRange(checkBoxes.ToArray());
+            f.Controls.Add(flowLayoutPanel);
+        }
+
+        private void CreateCheckBoxes2(FlowLayoutPanel f)
+        {
+            List<CheckBox> checkBoxes = new List<CheckBox>();
+            foreach (var orderBy in SelectItemInfo.OrderBys)
+            {
+                checkBoxes = new List<CheckBox>();
+                FlowLayoutPanel panel = new FlowLayoutPanel { Size = new Size(300, 21) };
+                CheckBox keyCheckBox = new CheckBox { Text = orderBy.Key, AutoSize = true };
+                keyCheckBox.CheckedChanged += CheckBoxOrderby_CheckedChanged;
+                checkBoxes.Add(keyCheckBox);
+                panel.Controls.AddRange(checkBoxes.ToArray());
+                f.Controls.Add(panel);
+            }
         }
 
         private void AccountForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -159,11 +224,14 @@ namespace Accounting.Forms.AccountingFoms
                     StartTime = DateTimePicker_Start.Value,
                     EndTime = DateTimePicker_End.Value
                 };
+                //if (SelectItemInfo.OrderBys.Values.Any(x => x))
+                //    _accountingDataPresenter.GetGroupByAmounts(searchDate, SelectItemInfo.OrderBys);
+                //else
                 _accountingDataPresenter.GetAddAccountingInfos(searchDate);
             }));
         }
 
-        public void RenderAddAccountingInfos(List<AddAccountingInfo> addAccountingInfos)
+        void IAccountingDataView.RenderAddAccountingInfos(List<AddAccountingInfo> addAccountingInfos)
         {
             DataGridView_AccountingInfo.Init();
             if (addAccountingInfos == null)
@@ -281,6 +349,54 @@ namespace Accounting.Forms.AccountingFoms
             }
             DataGridView_AccountingInfo.ClearSelection();
             Console.WriteLine(1);
+        }
+
+        List<Expression<Func<AddAccountingInfo, bool>>> conditions = new List<Expression<Func<AddAccountingInfo, bool>>>();
+        private void CheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+            string text = checkBox.Text;
+            if (checkBox.Checked)
+            {
+                if (checkBox.Tag.ToString() == "交通")
+                    SelectItemInfo.A_Conditions.Add(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "飲食")
+                    SelectItemInfo.B_Conditions.Add(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "娛樂")
+                    SelectItemInfo.C_Conditions.Add(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "對象")
+                    SelectItemInfo.D_Conditions.Add(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "付款方式")
+                    SelectItemInfo.E_Conditions.Add(SelectItemInfo.Funcs[text]);
+            }
+            else
+            {
+                if (checkBox.Tag.ToString() == "交通")
+                    SelectItemInfo.A_Conditions.Remove(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "飲食")
+                    SelectItemInfo.B_Conditions.Remove(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "娛樂")
+                    SelectItemInfo.C_Conditions.Remove(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "對象")
+                    SelectItemInfo.D_Conditions.Remove(SelectItemInfo.Funcs[text]);
+                if (checkBox.Tag.ToString() == "付款方式")
+                    SelectItemInfo.E_Conditions.Remove(SelectItemInfo.Funcs[text]);
+            }
+        }
+
+        private void CheckBoxOrderby_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+            string text = checkBox.Text;
+            SelectItemInfo.OrderBys[text] = checkBox.Checked;
+        }
+
+        void IAccountingDataView.RenderGroupByAmounts(List<GroupByAmount> groupByAmounts)
+        {
+            DataGridView_AccountingInfo.Init();
+            if (groupByAmounts == null)
+                return;
+            DataGridView_AccountingInfo.DataSource = groupByAmounts;
         }
     }
 }

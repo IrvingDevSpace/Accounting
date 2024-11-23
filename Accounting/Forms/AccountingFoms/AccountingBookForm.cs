@@ -315,7 +315,7 @@ namespace Accounting.Forms.AccountingFoms
             CSVHelper.Write($"{directoryPath}\\Data.csv", addAccountingInfos);
         }
 
-        public void RenderAddAccountingInfos(List<AddAccountingInfo> addAccountingInfos)
+        void IAccountingDataView.RenderAddAccountingInfos(List<AddAccountingInfo> addAccountingInfos)
         {
             DataGridView_AccountingInfo.Init();
             if (addAccountingInfos == null)
@@ -433,6 +433,11 @@ namespace Accounting.Forms.AccountingFoms
             }
             DataGridView_AccountingInfo.ClearSelection();
             Console.WriteLine(1);
+        }
+
+        void IAccountingDataView.RenderGroupByAmounts(List<GroupByAmount> groupByAmounts)
+        {
+            throw new NotImplementedException();
         }
     }
 }

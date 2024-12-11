@@ -70,15 +70,18 @@ namespace Accounting.Extension
                     //IsValueShownAsLabel = true, // 顯示每個點
                     //Font = new Font("Microsoft JhengHei", 8, FontStyle.Bold), // 每個點的字體
                     Name = chartParams[i].Name,
-                    LegendText = chartParams[i].LegendName,
+                    Label = "#VAL",
+                    LegendText = "#VALX",
                     ChartType = chartParams[i].ChartType,
                     BorderDashStyle = chartParams[i].ChartDashStyle,
                     BorderWidth = chartParams[i].BorderWidth,
                     Color = chartParams[i].BorderColor,
                     XValueType = chartParams[i].XValueType,
                     YValueType = chartParams[i].YValueType,
-                    ToolTip = "Time : #VALX{yyyy/MM/dd HH:mm:ss}, " + chartParams[i].Name + " Value : #VALY ℃"
+                    ToolTip = $"#VALX {chartParams[i].Name} Value : #VAL"
                 };
+                series["PieLabelStyle"] = "Outside";
+                series["PieLineColor"] = "Blue";
                 chart.Series.Add(series);
             }
         }
@@ -91,25 +94,25 @@ namespace Accounting.Extension
 
         private static void ChartAreaCreate(Chart chart, ChartArea chartArea, Font font, String xTitle, String yTitle, Double intervalX, Double intervalY)
         {
-            chartArea.AxisX.IsMarginVisible = false;
-            chartArea.AxisX.IntervalType = DateTimeIntervalType.Seconds;
-            chartArea.AxisX.Interval = intervalX;
-            chartArea.AxisY.Interval = intervalY;
-            chartArea.AxisY.Minimum = 0;
-            chartArea.AxisY.Maximum = 500;
-            chartArea.AxisX.LabelStyle.Format = "HH:mm:ss";
-            chartArea.AxisX.LabelStyle.Font = font; // Label字體大小無法設定
-            chartArea.AxisY.LabelStyle.Font = font; // Label字體大小無法設定
-            chartArea.AxisX.Title = xTitle;
-            chartArea.AxisY.Title = yTitle;
-            chartArea.AxisX.TitleFont = font;
-            chartArea.AxisY.TitleFont = font;
-            chartArea.AxisX.LineColor = Color.LightGray; // x軸顏色
-            chartArea.AxisY.LineColor = Color.LightGray; // y軸顏色
-            chartArea.AxisX.MajorGrid.LineColor = Color.LightGray; // x網格線顏色
-            chartArea.AxisY.MajorGrid.LineColor = Color.LightGray; // y網格線顏色
-            chartArea.AxisX.MajorTickMark.LineColor = Color.LightGray; // x軸刻度顏色
-            chartArea.AxisY.MajorTickMark.LineColor = Color.LightGray; // y軸刻度顏色
+            //chartArea.AxisX.IsMarginVisible = false;
+            //chartArea.AxisX.IntervalType = DateTimeIntervalType.Seconds;
+            //chartArea.AxisX.Interval = intervalX;
+            //chartArea.AxisY.Interval = intervalY;
+            //chartArea.AxisY.Minimum = 0;
+            //chartArea.AxisY.Maximum = 500;
+            //chartArea.AxisX.LabelStyle.Format = "HH:mm:ss";
+            //chartArea.AxisX.LabelStyle.Font = font; // Label字體大小無法設定
+            //chartArea.AxisY.LabelStyle.Font = font; // Label字體大小無法設定
+            //chartArea.AxisX.Title = xTitle;
+            //chartArea.AxisY.Title = yTitle;
+            //chartArea.AxisX.TitleFont = font;
+            //chartArea.AxisY.TitleFont = font;
+            //chartArea.AxisX.LineColor = Color.LightGray; // x軸顏色
+            //chartArea.AxisY.LineColor = Color.LightGray; // y軸顏色
+            //chartArea.AxisX.MajorGrid.LineColor = Color.LightGray; // x網格線顏色
+            //chartArea.AxisY.MajorGrid.LineColor = Color.LightGray; // y網格線顏色
+            //chartArea.AxisX.MajorTickMark.LineColor = Color.LightGray; // x軸刻度顏色
+            //chartArea.AxisY.MajorTickMark.LineColor = Color.LightGray; // y軸刻度顏色
             //chartArea.BackColor = Color.AliceBlue;
             //chartArea.BackGradientStyle = GradientStyle.HorizontalCenter; // 漸層方式
             //chartArea.BorderDashStyle = ChartDashStyle.Solid; // 邊框線Solid--實線

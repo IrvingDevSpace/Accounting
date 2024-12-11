@@ -186,10 +186,10 @@ namespace Accounting.Repositories.Implementations
                 Payment = SelectItemInfo.OrderBys["付款方式"] ? x.Payment : null,
             }).Select(g => new GroupByAmount
             {
-                GroupKey = g.Key.ToString(),
+                GroupKey = $"{g.Key.Type} {g.Key.Purpose} {g.Key.Companion} {g.Key.Payment}".Trim(),
                 Amount = g.Sum(x => Convert.ToInt32(x.Amount))
             })
-            .ToList();
+            .OrderBy(x => x.GroupKey).ToList();
             return groupByAmount;
         }
     }

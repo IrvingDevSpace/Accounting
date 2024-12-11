@@ -19,6 +19,7 @@ namespace Accounting.Contract
             void GetAddAccountingInfos(SearchDate searchDate);
             void GetAddAccountingInfos(SearchDate searchDate, List<string> purpose, List<string> companions, List<string> payments);
             void GetGroupByAmounts(SearchDate searchDate, List<string> purpose, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys);
+            void GetTwoGroupByAmounts(SearchDate searchDate, List<string> purpose, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys);
         }
     }
 }

@@ -36,5 +36,15 @@ namespace Accounting.Presenter
             List<GroupByAmount> groupByAmounts = _addAccountingInfoRepository.GetGroupByAmounts(searchDate, purpose, companions, payments, orderBys);
             _accountingDataView.RenderGroupByAmounts(groupByAmounts);
         }
+
+        public void GetTwoGroupByAmounts(SearchDate searchDate, List<string> purpose, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys)
+        {
+            List<GroupByAmount> groupByAmounts1 = _addAccountingInfoRepository.GetGroupByAmounts(searchDate, purpose, companions, payments, orderBys);
+            searchDate.StartTime = searchDate.StartTime.AddMonths(1);
+            searchDate.EndTime = searchDate.EndTime.AddMonths(1);
+            List<GroupByAmount> groupByAmounts2 = _addAccountingInfoRepository.GetGroupByAmounts(searchDate, purpose, companions, payments, orderBys);
+            groupByAmounts1.AddRange(groupByAmounts2);
+            _accountingDataView.RenderGroupByAmounts(groupByAmounts1);
+        }
     }
 }

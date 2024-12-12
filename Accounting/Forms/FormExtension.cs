@@ -1,4 +1,4 @@
-﻿using Accounting.SingletonUtils;
+﻿using Accounting.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

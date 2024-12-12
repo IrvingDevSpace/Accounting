@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Accounting.Models
 {
-    public class AddAccountingInfo
+    public class AccountingInfo
     {
         [DisplayName("時間")]
         public String Time { get; set; }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Accounting.SingletonUtils
+namespace Accounting.Attributes
 {
     internal class NavbarAttribute : Attribute
     {

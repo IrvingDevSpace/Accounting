@@ -1,6 +1,6 @@
-﻿using Accounting.Components;
+﻿using Accounting.Attributes;
+using Accounting.Components;
 using Accounting.Models;
-using Accounting.SingletonUtils;
 using Accounting.Utility;
 using CSV;
 using System;
@@ -44,11 +44,11 @@ namespace Accounting.Forms.AccountingFoms
             this.Controls.Add(navbar);
             this.SetFormsNavbarButton();
 
-            foreach (var type in SelectItemInfo.Types.Keys)
+            foreach (var type in ExpenseData.Types.Keys)
                 ComboBox_Type.Items.Add(type);
-            foreach (var companion in SelectItemInfo.Companions)
+            foreach (var companion in ExpenseData.Companions)
                 ComboBox_Companion.Items.Add(companion);
-            foreach (var payment in SelectItemInfo.Payments)
+            foreach (var payment in ExpenseData.Payments)
                 ComboBox_Payment.Items.Add(payment);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -63,7 +63,7 @@ namespace Accounting.Forms.AccountingFoms
         {
             ComboBox comboBox = (ComboBox)sender;
             String typeName = comboBox.Text;
-            if (!SelectItemInfo.Types.TryGetValue(typeName, out List<string> values))
+            if (!ExpenseData.Types.TryGetValue(typeName, out List<string> values))
                 return;
             ComboBox_Purpose.Items.Clear();
             foreach (var value in values)
@@ -106,7 +106,7 @@ namespace Accounting.Forms.AccountingFoms
             ImageEncoder.CompressionAndSave((Bitmap)pictureBox1.Image.Clone(), imgPathCompression1, 1L);
             ImageEncoder.CompressionAndSave((Bitmap)pictureBox2.Image.Clone(), imgPathCompression2, 1L);
 
-            AddAccountingInfo addAccountingInfo = new AddAccountingInfo
+            AccountingInfo AccountingInfo = new AccountingInfo
             {
                 Time = time,
                 Amount = amount,
@@ -120,7 +120,7 @@ namespace Accounting.Forms.AccountingFoms
                 ImagePathCompression2 = imgPathCompression2
             };
 
-            CSVHelper.Write($"{directoryPath}\\Data.csv", addAccountingInfo);
+            CSVHelper.Write($"{directoryPath}\\Data.csv", AccountingInfo);
             MessageBox.Show("儲存成功", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }

@@ -1,18 +1,13 @@
-﻿using Accounting.Extension;
+﻿using Accounting.Attributes;
+using Accounting.Extension;
 using Accounting.Models;
 using Accounting.Presenter;
-using Accounting.SingletonUtils;
-using LinqKit;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Accounting.Contract.AccountingDataContract;
 
@@ -46,22 +41,22 @@ namespace Accounting.Forms.AccountingFoms
             {
                 SearchDate searchDate = new SearchDate
                 {
-                    StartTime = DateTimePicker_Start.Value,
-                    EndTime = DateTimePicker_End.Value
+                    StartTime = DateTimePicker_Start.Value.Date,
+                    EndTime = DateTimePicker_End.Value.Date
                 };
-                if (SelectItemInfo.OrderBys.Values.Any(x => x))
-                    _accountingDataPresenter.GetGroupByAmounts(searchDate, purpose, companions, payments, SelectItemInfo.OrderBys);
+                if (ExpenseData.OrderBys.Values.Any(x => x))
+                    _accountingDataPresenter.GetGroupByAmounts(searchDate, purpose, companions, payments, ExpenseData.OrderBys);
                 else
-                    _accountingDataPresenter.GetAddAccountingInfos(searchDate, purpose, companions, payments);
+                    _accountingDataPresenter.GetAccountingInfos(searchDate, purpose, companions, payments);
             }));
         }
 
-        void IAccountingDataView.RenderAddAccountingInfos(List<AddAccountingInfo> addAccountingInfos)
+        void IAccountingDataView.RenderAccountingInfos(List<AccountingInfo> accountingInfos)
         {
             DataGridView_AccountingInfo.Init();
-            if (addAccountingInfos == null)
+            if (accountingInfos == null)
                 return;
-            DataGridView_AccountingInfo.DataSource = addAccountingInfos;
+            DataGridView_AccountingInfo.DataSource = accountingInfos;
             DataGridView_AccountingInfo.Columns["Time"].ReadOnly = true;
             DataGridView_AccountingInfo.Columns["Type"].Visible = false;
             DataGridView_AccountingInfo.Columns["Purpose"].Visible = false;
@@ -118,54 +113,54 @@ namespace Accounting.Forms.AccountingFoms
             btnCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;   //置中
             DataGridView_AccountingInfo.Columns.Add(btnCol);
 
-            for (int i = 0; i < addAccountingInfos.Count; i++)
+            for (int i = 0; i < accountingInfos.Count; i++)
             {
                 if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnType"] is DataGridViewComboBoxCell comboBoxTypeCell)
                 {
                     comboBoxTypeCell.Items.Clear();
-                    foreach (var type in SelectItemInfo.Types.Keys)
+                    foreach (var type in ExpenseData.Types.Keys)
                         comboBoxTypeCell.Items.Add(type);
-                    comboBoxTypeCell.Value = addAccountingInfos[i].Type;
+                    comboBoxTypeCell.Value = accountingInfos[i].Type;
                 }
                 if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnPurpose"] is DataGridViewComboBoxCell comboBoxPurposeCell)
                 {
                     comboBoxPurposeCell.Items.Clear();
-                    if (SelectItemInfo.Types.TryGetValue(addAccountingInfos[i].Type, out List<string> values))
+                    if (ExpenseData.Types.TryGetValue(accountingInfos[i].Type, out List<string> values))
                     {
                         comboBoxPurposeCell.Items.Clear();
                         foreach (var value in values)
                             comboBoxPurposeCell.Items.Add(value);
-                        comboBoxPurposeCell.Value = addAccountingInfos[i].Purpose;
+                        comboBoxPurposeCell.Value = accountingInfos[i].Purpose;
                     }
                 }
                 if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnCompanion"] is DataGridViewComboBoxCell comboBoxCompanionCell)
                 {
                     comboBoxCompanionCell.Items.Clear();
-                    foreach (var companion in SelectItemInfo.Companions)
+                    foreach (var companion in ExpenseData.Companions)
                         comboBoxCompanionCell.Items.Add(companion);
-                    comboBoxCompanionCell.Value = addAccountingInfos[i].Companion;
+                    comboBoxCompanionCell.Value = accountingInfos[i].Companion;
                 }
                 if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnPayment"] is DataGridViewComboBoxCell comboBoxPaymentCell)
                 {
                     comboBoxPaymentCell.Items.Clear();
-                    foreach (var payment in SelectItemInfo.Payments)
+                    foreach (var payment in ExpenseData.Payments)
                         comboBoxPaymentCell.Items.Add(payment);
-                    comboBoxPaymentCell.Value = addAccountingInfos[i].Payment;
+                    comboBoxPaymentCell.Value = accountingInfos[i].Payment;
                 }
-                if (File.Exists(addAccountingInfos[i].ImagePath1))
+                if (File.Exists(accountingInfos[i].ImagePath1))
                 {
-                    Image img = Image.FromFile(addAccountingInfos[i].ImagePath1);
+                    Image img = Image.FromFile(accountingInfos[i].ImagePath1);
                     DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Value = img;
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Tag = addAccountingInfos[i].ImagePathCompression1;
+                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Tag = accountingInfos[i].ImagePathCompression1;
                 }
                 else
                     DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Value = null;
 
-                if (File.Exists(addAccountingInfos[i].ImagePath2))
+                if (File.Exists(accountingInfos[i].ImagePath2))
                 {
-                    Image img = Image.FromFile(addAccountingInfos[i].ImagePath2);
+                    Image img = Image.FromFile(accountingInfos[i].ImagePath2);
                     DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Value = img;
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Tag = addAccountingInfos[i].ImagePathCompression2;
+                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Tag = accountingInfos[i].ImagePathCompression2;
                 }
                 else
                     DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Value = null;
@@ -184,13 +179,9 @@ namespace Accounting.Forms.AccountingFoms
             DataGridView_AccountingInfo.DataSource = groupByAmounts;
         }
 
-
-
-
         private void CreateCheckBoxes(FlowLayoutPanel f)
         {
-
-            foreach (var type in SelectItemInfo.Types)
+            foreach (var type in ExpenseData.Types)
             {
                 List<CheckBox> checkBoxes = new List<CheckBox>();
                 FlowLayoutPanel panel = new FlowLayoutPanel { Size = new Size(300, 21) };
@@ -211,7 +202,7 @@ namespace Accounting.Forms.AccountingFoms
             CheckBox c1 = new CheckBox { Text = "對象", AutoSize = true, Tag = "對象" };
             c1.CheckedChanged += CheckBox_AllCheckedChanged;
             checkBoxes1.Add(c1);
-            foreach (var companion in SelectItemInfo.Companions)
+            foreach (var companion in ExpenseData.Companions)
             {
                 CheckBox checkBox = new CheckBox { Text = companion, AutoSize = true, Tag = "對象" };
                 checkBox.CheckedChanged += CheckBox_CheckedChanged;
@@ -225,7 +216,7 @@ namespace Accounting.Forms.AccountingFoms
             CheckBox c2 = new CheckBox { Text = "付款方式", AutoSize = true, Tag = "付款方式" };
             c2.CheckedChanged += CheckBox_AllCheckedChanged;
             checkBoxes2.Add(c2);
-            foreach (var payment in SelectItemInfo.Payments)
+            foreach (var payment in ExpenseData.Payments)
             {
                 CheckBox checkBox = new CheckBox { Text = payment, AutoSize = true, Tag = "付款方式" };
                 checkBox.CheckedChanged += CheckBox_CheckedChanged;
@@ -239,7 +230,7 @@ namespace Accounting.Forms.AccountingFoms
         private void CreateCheckBoxes2(FlowLayoutPanel f)
         {
             List<CheckBox> checkBoxes = new List<CheckBox>();
-            foreach (var orderBy in SelectItemInfo.OrderBys)
+            foreach (var orderBy in ExpenseData.OrderBys)
             {
                 checkBoxes = new List<CheckBox>();
                 FlowLayoutPanel panel = new FlowLayoutPanel { Size = new Size(300, 21) };
@@ -251,16 +242,14 @@ namespace Accounting.Forms.AccountingFoms
             }
         }
 
-        List<Expression<Func<AddAccountingInfo, bool>>> conditions = new List<Expression<Func<AddAccountingInfo, bool>>>();
+        List<Expression<Func<AccountingInfo, bool>>> conditions = new List<Expression<Func<AccountingInfo, bool>>>();
 
         private void CheckBox_AllCheckedChanged(object sender, EventArgs e)
         {
             CheckBox checkBox = (CheckBox)sender;
             FlowLayoutPanel panel = (FlowLayoutPanel)checkBox.Parent;
-            panel.Controls.OfType<CheckBox>().ForEach(x =>
-            {
-                x.Checked = checkBox.Checked;
-            });
+            foreach (var item in panel.Controls.OfType<CheckBox>())
+                item.Checked = checkBox.Checked;
         }
 
         List<string> purpose = new List<string>();
@@ -300,7 +289,7 @@ namespace Accounting.Forms.AccountingFoms
         {
             CheckBox checkBox = (CheckBox)sender;
             string text = checkBox.Text;
-            SelectItemInfo.OrderBys[text] = checkBox.Checked;
+            ExpenseData.OrderBys[text] = checkBox.Checked;
         }
     }
 }

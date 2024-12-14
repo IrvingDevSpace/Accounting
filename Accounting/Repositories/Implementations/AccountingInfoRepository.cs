@@ -3,9 +3,11 @@ using Accounting.Repositories.Interfaces;
 using CSV;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Accounting.Repositories.Implementations
 {
@@ -13,7 +15,7 @@ namespace Accounting.Repositories.Implementations
     {
         private readonly string fileServerPath = ConfigurationManager.AppSettings["FileServerPath"];
 
-        public List<AccountingInfo> GetAccountingInfos(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments)
+        public List<AccountingInfo> GetAccountingInfos(SearchDate searchDate)
         {
             if (searchDate.StartTime > searchDate.EndTime)
                 return null;
@@ -27,28 +29,40 @@ namespace Accounting.Repositories.Implementations
                     accountingInfos.AddRange(CSVHelper.Read<AccountingInfo>(Path.Combine(directoryName, "Data.csv")));
             }
 
-            if (purposes.Count > 0)
-                accountingInfos = accountingInfos.Where(x => purposes.Contains(x.Purpose)).ToList();
-            if (companions.Count > 0)
-                accountingInfos = accountingInfos.Where(x => companions.Contains(x.Companion)).ToList();
-            if (payments.Count > 0)
-                accountingInfos = accountingInfos.Where(x => payments.Contains(x.Payment)).ToList();
+            var propertys = typeof(AccountingInfo)
+            .GetProperties()
+            .Where(prop => prop.GetCustomAttribute<DisplayNameAttribute>() != null)
+            .ToDictionary(
+                prop => prop.GetCustomAttribute<DisplayNameAttribute>().DisplayName,
+                prop => prop
+            );
 
+            foreach (var category in ExpenseData.CategoryLists)
+            {
+                if (category.Value.Count > 0 && propertys.TryGetValue(category.Key, out var property))
+                {
+                    // 動態篩選資料
+                    accountingInfos = accountingInfos
+                        .Where(info => category.Value.Contains(property.GetValue(info)?.ToString()))
+                        .ToList();
+                }
+            }
             return accountingInfos;
         }
 
-        public List<GroupByAmount> GetGroupByAmounts(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys)
+        public List<GroupByAmount> GetGroupByAmounts(SearchDate searchDate)
         {
-            var accountingInfos = GetAccountingInfos(searchDate, purposes, companions, payments);
+            var accountingInfos = GetAccountingInfos(searchDate);
             var groupByAmount = accountingInfos.GroupBy(x => new
             {
+                Time = ExpenseData.OrderBys["時間"] ? x.Time : null,
                 Type = ExpenseData.OrderBys["類型"] ? x.Type : null,
                 Purpose = ExpenseData.OrderBys["目的"] ? x.Purpose : null,
                 Companion = ExpenseData.OrderBys["對象"] ? x.Companion : null,
                 Payment = ExpenseData.OrderBys["付款方式"] ? x.Payment : null,
             }).Select(g => new GroupByAmount
             {
-                GroupKey = string.Join(", ", new[] { g.Key.Type, g.Key.Purpose, g.Key.Companion, g.Key.Payment }
+                GroupKey = string.Join(", ", new[] { g.Key.Time, g.Key.Type, g.Key.Purpose, g.Key.Companion, g.Key.Payment }
                                 .Where(value => !string.IsNullOrEmpty(value))), // 過濾掉 null 或空字串
                 Amount = g.Sum(x => Convert.ToInt32(x.Amount))
             }).OrderBy(x => x.GroupKey).ToList();

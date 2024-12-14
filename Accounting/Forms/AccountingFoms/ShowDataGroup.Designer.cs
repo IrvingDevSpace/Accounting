@@ -40,56 +40,66 @@
             // 
             // FLP_OrderBy
             // 
-            this.FLP_OrderBy.Location = new System.Drawing.Point(17, 310);
+            this.FLP_OrderBy.Location = new System.Drawing.Point(11, 207);
+            this.FLP_OrderBy.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.FLP_OrderBy.Name = "FLP_OrderBy";
-            this.FLP_OrderBy.Size = new System.Drawing.Size(468, 225);
+            this.FLP_OrderBy.Size = new System.Drawing.Size(312, 150);
             this.FLP_OrderBy.TabIndex = 18;
             // 
             // FLP_Where
             // 
-            this.FLP_Where.Location = new System.Drawing.Point(17, 80);
+            this.FLP_Where.Location = new System.Drawing.Point(11, 53);
+            this.FLP_Where.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.FLP_Where.Name = "FLP_Where";
-            this.FLP_Where.Size = new System.Drawing.Size(468, 225);
+            this.FLP_Where.Size = new System.Drawing.Size(312, 150);
             this.FLP_Where.TabIndex = 19;
             // 
             // DateTimePicker_End
             // 
-            this.DateTimePicker_End.Location = new System.Drawing.Point(506, 20);
+            this.DateTimePicker_End.Location = new System.Drawing.Point(337, 13);
+            this.DateTimePicker_End.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.DateTimePicker_End.Name = "DateTimePicker_End";
-            this.DateTimePicker_End.Size = new System.Drawing.Size(198, 29);
+            this.DateTimePicker_End.Size = new System.Drawing.Size(133, 22);
             this.DateTimePicker_End.TabIndex = 17;
             // 
             // DateTimePicker_Start
             // 
-            this.DateTimePicker_Start.Location = new System.Drawing.Point(287, 20);
+            this.DateTimePicker_Start.Location = new System.Drawing.Point(191, 13);
+            this.DateTimePicker_Start.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.DateTimePicker_Start.Name = "DateTimePicker_Start";
-            this.DateTimePicker_Start.Size = new System.Drawing.Size(198, 29);
+            this.DateTimePicker_Start.Size = new System.Drawing.Size(133, 22);
             this.DateTimePicker_Start.TabIndex = 16;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(210, 28);
+            this.label1.Location = new System.Drawing.Point(140, 19);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(44, 18);
+            this.label1.Size = new System.Drawing.Size(29, 12);
             this.label1.TabIndex = 15;
             this.label1.Text = "日期";
             // 
             // DataGridView_AccountingInfo
             // 
             this.DataGridView_AccountingInfo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DataGridView_AccountingInfo.Location = new System.Drawing.Point(492, 80);
+            this.DataGridView_AccountingInfo.Location = new System.Drawing.Point(328, 53);
+            this.DataGridView_AccountingInfo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.DataGridView_AccountingInfo.Name = "DataGridView_AccountingInfo";
             this.DataGridView_AccountingInfo.RowHeadersWidth = 62;
             this.DataGridView_AccountingInfo.RowTemplate.Height = 31;
-            this.DataGridView_AccountingInfo.Size = new System.Drawing.Size(988, 456);
+            this.DataGridView_AccountingInfo.Size = new System.Drawing.Size(659, 304);
             this.DataGridView_AccountingInfo.TabIndex = 14;
+            this.DataGridView_AccountingInfo.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView_AccountingInfo_CellContentClick);
+            this.DataGridView_AccountingInfo.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView_AccountingInfo_CellContentDoubleClick);
+            this.DataGridView_AccountingInfo.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView_AccountingInfo_CellEndEdit);
             // 
             // Button_Select
             // 
-            this.Button_Select.Location = new System.Drawing.Point(905, 13);
+            this.Button_Select.Location = new System.Drawing.Point(603, 9);
+            this.Button_Select.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Button_Select.Name = "Button_Select";
-            this.Button_Select.Size = new System.Drawing.Size(165, 50);
+            this.Button_Select.Size = new System.Drawing.Size(110, 33);
             this.Button_Select.TabIndex = 13;
             this.Button_Select.Text = "查詢";
             this.Button_Select.UseVisualStyleBackColor = true;
@@ -97,9 +107,9 @@
             // 
             // ShowDataGroup
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1527, 608);
+            this.ClientSize = new System.Drawing.Size(1018, 441);
             this.Controls.Add(this.FLP_OrderBy);
             this.Controls.Add(this.FLP_Where);
             this.Controls.Add(this.DateTimePicker_End);
@@ -107,9 +117,9 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.DataGridView_AccountingInfo);
             this.Controls.Add(this.Button_Select);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "ShowDataGroup";
             this.Text = "ShowDataGroup";
-            this.Load += new System.EventHandler(this.ShowDataGroup_Load);
             ((System.ComponentModel.ISupportInitialize)(this.DataGridView_AccountingInfo)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

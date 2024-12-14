@@ -1,13 +1,17 @@
 ﻿using Accounting.Attributes;
+using Accounting.Components;
 using Accounting.Extension;
 using Accounting.Models;
 using Accounting.Presenter;
+using CSV;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows.Forms;
 using static Accounting.Contract.AccountingDataContract;
 
@@ -16,18 +20,40 @@ namespace Accounting.Forms.AccountingFoms
     [Navbar("顯示")]
     public partial class ShowDataGroup : Form, IAccountingDataView
     {
+        private Navbar navbar;
         private IAccountingDataPresenter _accountingDataPresenter = null;
 
         public ShowDataGroup()
         {
             InitializeComponent();
+            AddEvent();
             _accountingDataPresenter = new AccountingDataPresenter(this);
+        }
+
+        private void AddEvent()
+        {
+            this.Load += ShowDataGroup_Load;
+            this.FormClosed += ShowDataGroup_FormClosed;
         }
 
         private void ShowDataGroup_Load(object sender, EventArgs e)
         {
-            CreateCheckBoxes(FLP_Where);
-            CreateCheckBoxes2(FLP_OrderBy);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            navbar = new Navbar
+            {
+                Location = new System.Drawing.Point(11, 361),
+                Name = "Navbar_ChangeForm",
+                Size = new System.Drawing.Size(550, 70)
+            };
+            this.Controls.Add(navbar);
+            this.SetFormsNavbarButton();
+            CreateWhereCheckBoxes(FLP_Where);
+            CreateOrderByCheckBoxes(FLP_OrderBy);
+        }
+
+        private void ShowDataGroup_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Environment.Exit(0);
         }
 
         private void Button_Select_Click(object sender, EventArgs e)
@@ -45,9 +71,9 @@ namespace Accounting.Forms.AccountingFoms
                     EndTime = DateTimePicker_End.Value.Date
                 };
                 if (ExpenseData.OrderBys.Values.Any(x => x))
-                    _accountingDataPresenter.GetGroupByAmounts(searchDate, purpose, companions, payments, ExpenseData.OrderBys);
+                    _accountingDataPresenter.GetGroupByAmounts(searchDate);
                 else
-                    _accountingDataPresenter.GetAccountingInfos(searchDate, purpose, companions, payments);
+                    _accountingDataPresenter.GetAccountingInfos(searchDate);
             }));
         }
 
@@ -57,114 +83,91 @@ namespace Accounting.Forms.AccountingFoms
             if (accountingInfos == null)
                 return;
             DataGridView_AccountingInfo.DataSource = accountingInfos;
-            DataGridView_AccountingInfo.Columns["Time"].ReadOnly = true;
-            DataGridView_AccountingInfo.Columns["Type"].Visible = false;
-            DataGridView_AccountingInfo.Columns["Purpose"].Visible = false;
-            DataGridView_AccountingInfo.Columns["Companion"].Visible = false;
-            DataGridView_AccountingInfo.Columns["Payment"].Visible = false;
-            DataGridView_AccountingInfo.Columns["ImagePath1"].Visible = false;
-            DataGridView_AccountingInfo.Columns["ImagePath2"].Visible = false;
-            DataGridView_AccountingInfo.Columns["ImagePathCompression1"].Visible = false;
-            DataGridView_AccountingInfo.Columns["ImagePathCompression2"].Visible = false;
 
-            DataGridViewComboBoxColumn comboBoxColType = new DataGridViewComboBoxColumn();
-            comboBoxColType.Name = "comboBoxColumnType";
-            comboBoxColType.HeaderText = "類型";
-            comboBoxColType.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            DataGridView_AccountingInfo.Columns.Add(comboBoxColType);
+            var type = typeof(AccountingInfo);
+            var properties = type.GetProperties();
 
-            DataGridViewComboBoxColumn comboBoxColPurpose = new DataGridViewComboBoxColumn();
-            comboBoxColPurpose.Name = "comboBoxColumnPurpose";
-            comboBoxColPurpose.HeaderText = "目的";
-            comboBoxColPurpose.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            DataGridView_AccountingInfo.Columns.Add(comboBoxColPurpose);
+            foreach (var prop in properties)
+            {
+                var columnName = prop.Name;
+                var column = DataGridView_AccountingInfo.Columns[columnName];
 
-            DataGridViewComboBoxColumn comboBoxColCompanion = new DataGridViewComboBoxColumn();
-            comboBoxColCompanion.Name = "comboBoxColumnCompanion";
-            comboBoxColCompanion.HeaderText = "對象";
-            comboBoxColCompanion.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            DataGridView_AccountingInfo.Columns.Add(comboBoxColCompanion);
+                if (column == null) continue;
 
-            DataGridViewComboBoxColumn comboBoxColPayment = new DataGridViewComboBoxColumn();
-            comboBoxColPayment.Name = "comboBoxColumnPayment";
-            comboBoxColPayment.HeaderText = "付款方式";
-            comboBoxColPayment.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            DataGridView_AccountingInfo.Columns.Add(comboBoxColPayment);
+                // 檢查 GridColumn 屬性
+                var gridColumnAttr = prop.GetCustomAttribute<GridColumnAttribute>();
+                var displayNameColumnAttr = prop.GetCustomAttribute<DisplayNameAttribute>();
+                string headerText = displayNameColumnAttr?.DisplayName ?? prop.Name;
+                if (gridColumnAttr != null)
+                {
+                    DataGridViewColumn newColumn;
+                    column.ReadOnly = gridColumnAttr.ReadOnly;
+                    column.Visible = gridColumnAttr.Visible;
+                    if (gridColumnAttr.ColumnType == null) continue;
+                    newColumn = (DataGridViewColumn)Activator.CreateInstance(gridColumnAttr.ColumnType);
+                    newColumn.Name = gridColumnAttr.ColumnName;
+                    newColumn.HeaderText = headerText;
+                    newColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    // 處理 ComboBox 的資料來源
+                    if (newColumn is DataGridViewComboBoxColumn comboBoxColumn && !string.IsNullOrEmpty(headerText))
+                    {
+                        comboBoxColumn.Items.AddRange(ExpenseData.Datas[headerText].ToArray());
+                    }
+                    if (newColumn is DataGridViewImageColumn imageColumn)
+                    {
+                        imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
+                        imageColumn.ReadOnly = true; // 圖片列通常為只讀
+                    }
+                    DataGridView_AccountingInfo.Columns.Add(newColumn);
+                }
+            }
 
-            DataGridViewImageColumn imgCol1 = new DataGridViewImageColumn();
-            imgCol1.Name = "ImageColumnPath1";
-            imgCol1.HeaderText = "發票圖檔1";
-            imgCol1.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;   //置中
-            imgCol1.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            imgCol1.ReadOnly = true;
-            DataGridView_AccountingInfo.Columns.Add(imgCol1);
-
-            DataGridViewImageColumn imgCol2 = new DataGridViewImageColumn();
-            imgCol2.Name = "ImageColumnPath2";
-            imgCol2.HeaderText = "發票圖檔2";
-            imgCol2.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;   //置中
-            imgCol2.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            imgCol2.ReadOnly = true;
-            DataGridView_AccountingInfo.Columns.Add(imgCol2);
-
-            DataGridViewButtonColumn btnCol = new DataGridViewButtonColumn();
-            btnCol.Name = "Delete";
-            btnCol.HeaderText = "刪除";
-            btnCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;   //置中
-            DataGridView_AccountingInfo.Columns.Add(btnCol);
+            DataGridViewButtonColumn btnDeleteCol = new DataGridViewButtonColumn();
+            btnDeleteCol.Name = "Delete";
+            btnDeleteCol.HeaderText = "刪除";
+            btnDeleteCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;   //置中
+            DataGridView_AccountingInfo.Columns.Add(btnDeleteCol);
 
             for (int i = 0; i < accountingInfos.Count; i++)
             {
-                if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnType"] is DataGridViewComboBoxCell comboBoxTypeCell)
+                var row = DataGridView_AccountingInfo.Rows[i];
+                foreach (var property in properties)
                 {
-                    comboBoxTypeCell.Items.Clear();
-                    foreach (var type in ExpenseData.Types.Keys)
-                        comboBoxTypeCell.Items.Add(type);
-                    comboBoxTypeCell.Value = accountingInfos[i].Type;
-                }
-                if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnPurpose"] is DataGridViewComboBoxCell comboBoxPurposeCell)
-                {
-                    comboBoxPurposeCell.Items.Clear();
-                    if (ExpenseData.Types.TryGetValue(accountingInfos[i].Type, out List<string> values))
+                    var attribute = property.GetCustomAttribute<GridColumnAttribute>();
+                    if (attribute?.ColumnType == null)
+                        continue;
+                    var value = property.GetValue(accountingInfos[i]);
+                    if (row.Cells[attribute.ColumnName] is DataGridViewComboBoxCell comboBoxCell)
                     {
-                        comboBoxPurposeCell.Items.Clear();
-                        foreach (var value in values)
-                            comboBoxPurposeCell.Items.Add(value);
-                        comboBoxPurposeCell.Value = accountingInfos[i].Purpose;
+                        string valueString = value.ToString();
+                        comboBoxCell.Value = valueString;
+                        if (!ExpenseData.CategoryToPurpose.ContainsKey(valueString))
+                            continue;
+                        if (row.Cells[attribute.ChildColumnName] is DataGridViewComboBoxCell comboBoxChildCell)
+                        {
+                            comboBoxChildCell.Value = null;
+                            comboBoxChildCell.Items.Clear();
+                            foreach (var item in ExpenseData.CategoryToPurpose[valueString])
+                                comboBoxChildCell.Items.Add(item);
+                            comboBoxChildCell.Value = comboBoxChildCell.Items[0];
+                        }
                     }
+                    else if (row.Cells[attribute.ColumnName] is DataGridViewImageCell imageCell)
+                    {
+                        if (!File.Exists(value?.ToString()))
+                            continue;
+                        imageCell.Value = Image.FromFile(value.ToString());
+                        var compressionPath = property.GetCustomAttribute<GridColumnAttribute>()?.ImagePathCompression;
+                        if (!string.IsNullOrEmpty(compressionPath))
+                        {
+                            var compressionValue = type.GetProperty(compressionPath)?.GetValue(accountingInfos[i]);
+                            imageCell.Tag = compressionValue;
+                        }
+                    }
+                    else
+                        row.Cells[attribute.ColumnName].Value = value;
                 }
-                if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnCompanion"] is DataGridViewComboBoxCell comboBoxCompanionCell)
-                {
-                    comboBoxCompanionCell.Items.Clear();
-                    foreach (var companion in ExpenseData.Companions)
-                        comboBoxCompanionCell.Items.Add(companion);
-                    comboBoxCompanionCell.Value = accountingInfos[i].Companion;
-                }
-                if (DataGridView_AccountingInfo.Rows[i].Cells["comboBoxColumnPayment"] is DataGridViewComboBoxCell comboBoxPaymentCell)
-                {
-                    comboBoxPaymentCell.Items.Clear();
-                    foreach (var payment in ExpenseData.Payments)
-                        comboBoxPaymentCell.Items.Add(payment);
-                    comboBoxPaymentCell.Value = accountingInfos[i].Payment;
-                }
-                if (File.Exists(accountingInfos[i].ImagePath1))
-                {
-                    Image img = Image.FromFile(accountingInfos[i].ImagePath1);
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Value = img;
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Tag = accountingInfos[i].ImagePathCompression1;
-                }
-                else
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath1"].Value = null;
-
-                if (File.Exists(accountingInfos[i].ImagePath2))
-                {
-                    Image img = Image.FromFile(accountingInfos[i].ImagePath2);
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Value = img;
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Tag = accountingInfos[i].ImagePathCompression2;
-                }
-                else
-                    DataGridView_AccountingInfo.Rows[i].Cells["ImageColumnPath2"].Value = null;
-                if (DataGridView_AccountingInfo.Rows[i].Cells["Delete"] is DataGridViewButtonCell buttonDeleteCell)
+                if (row.Cells["Delete"] is DataGridViewButtonCell buttonDeleteCell)
                     buttonDeleteCell.Value = "刪除";
             }
             DataGridView_AccountingInfo.ClearSelection();
@@ -179,70 +182,37 @@ namespace Accounting.Forms.AccountingFoms
             DataGridView_AccountingInfo.DataSource = groupByAmounts;
         }
 
-        private void CreateCheckBoxes(FlowLayoutPanel f)
+        private void CreateWhereCheckBoxes(FlowLayoutPanel flowLayoutPanel)
         {
-            foreach (var type in ExpenseData.Types)
+            foreach (var key in ExpenseData.Datas.Keys)
             {
                 List<CheckBox> checkBoxes = new List<CheckBox>();
-                FlowLayoutPanel panel = new FlowLayoutPanel { Size = new Size(300, 21) };
-                CheckBox keyCheckBox = new CheckBox { Text = type.Key, AutoSize = true };
+                FlowLayoutPanel panel = new FlowLayoutPanel { AutoSize = true };
+                CheckBox keyCheckBox = new CheckBox { Text = key, AutoSize = true };
                 keyCheckBox.CheckedChanged += CheckBox_AllCheckedChanged;
                 checkBoxes.Add(keyCheckBox);
-                foreach (var item in type.Value)
+                foreach (var item in ExpenseData.Datas[key])
                 {
-                    CheckBox valCheckBox = new CheckBox { Text = item, AutoSize = true, Tag = type.Key };
-                    valCheckBox.CheckedChanged += CheckBox_PurposeCheckedChanged;
+                    CheckBox valCheckBox = new CheckBox { Text = item, AutoSize = true, Tag = key };
+                    valCheckBox.CheckedChanged += CheckBox_CheckedChanged;
                     checkBoxes.Add(valCheckBox);
                 }
                 panel.Controls.AddRange(checkBoxes.ToArray());
-                f.Controls.Add(panel);
+                flowLayoutPanel.Controls.Add(panel);
             }
-
-            List<CheckBox> checkBoxes1 = new List<CheckBox>();
-            CheckBox c1 = new CheckBox { Text = "對象", AutoSize = true, Tag = "對象" };
-            c1.CheckedChanged += CheckBox_AllCheckedChanged;
-            checkBoxes1.Add(c1);
-            foreach (var companion in ExpenseData.Companions)
-            {
-                CheckBox checkBox = new CheckBox { Text = companion, AutoSize = true, Tag = "對象" };
-                checkBox.CheckedChanged += CheckBox_CheckedChanged;
-                checkBoxes1.Add(checkBox);
-            }
-            FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel { Size = new Size(300, 21) };
-            flowLayoutPanel.Controls.AddRange(checkBoxes1.ToArray());
-            f.Controls.Add(flowLayoutPanel);
-
-            List<CheckBox> checkBoxes2 = new List<CheckBox>();
-            CheckBox c2 = new CheckBox { Text = "付款方式", AutoSize = true, Tag = "付款方式" };
-            c2.CheckedChanged += CheckBox_AllCheckedChanged;
-            checkBoxes2.Add(c2);
-            foreach (var payment in ExpenseData.Payments)
-            {
-                CheckBox checkBox = new CheckBox { Text = payment, AutoSize = true, Tag = "付款方式" };
-                checkBox.CheckedChanged += CheckBox_CheckedChanged;
-                checkBoxes2.Add(checkBox);
-            }
-            flowLayoutPanel = new FlowLayoutPanel { Size = new Size(300, 21) };
-            flowLayoutPanel.Controls.AddRange(checkBoxes2.ToArray());
-            f.Controls.Add(flowLayoutPanel);
         }
 
-        private void CreateCheckBoxes2(FlowLayoutPanel f)
+        private void CreateOrderByCheckBoxes(FlowLayoutPanel flowLayoutPanel)
         {
-            List<CheckBox> checkBoxes = new List<CheckBox>();
+            FlowLayoutPanel panel = new FlowLayoutPanel { AutoSize = true };
             foreach (var orderBy in ExpenseData.OrderBys)
             {
-                checkBoxes = new List<CheckBox>();
-                FlowLayoutPanel panel = new FlowLayoutPanel { Size = new Size(300, 21) };
                 CheckBox keyCheckBox = new CheckBox { Text = orderBy.Key, AutoSize = true };
                 keyCheckBox.CheckedChanged += CheckBoxOrderby_CheckedChanged;
-                checkBoxes.Add(keyCheckBox);
-                panel.Controls.AddRange(checkBoxes.ToArray());
-                f.Controls.Add(panel);
+                panel.Controls.Add(keyCheckBox);
             }
+            flowLayoutPanel.Controls.Add(panel);
         }
-
-        List<Expression<Func<AccountingInfo, bool>>> conditions = new List<Expression<Func<AccountingInfo, bool>>>();
 
         private void CheckBox_AllCheckedChanged(object sender, EventArgs e)
         {
@@ -252,36 +222,16 @@ namespace Accounting.Forms.AccountingFoms
                 item.Checked = checkBox.Checked;
         }
 
-        List<string> purpose = new List<string>();
-
-        private void CheckBox_PurposeCheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox checkBox = (CheckBox)sender;
-            if (checkBox.Checked)
-                purpose.Add(checkBox.Text);
-            else
-                purpose.Remove(checkBox.Text);
-        }
-
-        List<string> companions = new List<string>();
-        List<string> payments = new List<string>();
-
         private void CheckBox_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox checkBox = (CheckBox)sender;
-            if (checkBox.Checked)
+            if (checkBox.Tag is string tag && ExpenseData.CategoryLists.ContainsKey(tag))
             {
-                if (checkBox.Tag.ToString() == "對象")
-                    companions.Add(checkBox.Text);
-                if (checkBox.Tag.ToString() == "付款方式")
-                    payments.Add(checkBox.Text);
-            }
-            else
-            {
-                if (checkBox.Tag.ToString() == "對象")
-                    companions.Remove(checkBox.Text);
-                if (checkBox.Tag.ToString() == "付款方式")
-                    payments.Remove(checkBox.Text);
+                List<string> list = ExpenseData.CategoryLists[tag];
+                if (checkBox.Checked)
+                    list.Add(checkBox.Text);
+                else
+                    list.Remove(checkBox.Text);
             }
         }
 
@@ -290,6 +240,101 @@ namespace Accounting.Forms.AccountingFoms
             CheckBox checkBox = (CheckBox)sender;
             string text = checkBox.Text;
             ExpenseData.OrderBys[text] = checkBox.Checked;
+        }
+
+        private void DataGridView_AccountingInfo_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dataGridView = sender as DataGridView;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] is DataGridViewButtonCell btn)
+            {
+                String time = dataGridView.Rows[e.RowIndex].Cells[0].Value.ToString();
+                List<AccountingInfo> accountingInfos = dataGridView.DataSource as List<AccountingInfo>;
+                dataGridView.Init();
+                accountingInfos.RemoveAt(e.RowIndex);
+                accountingInfos = accountingInfos.Where(x => x.Time == time).ToList();
+                String directoryPath = Path.Combine(ConfigurationManager.AppSettings["FileServerPath"], time);
+                if (!Directory.Exists(directoryPath))
+                    Directory.CreateDirectory(directoryPath);
+                string filePath = Path.Combine(directoryPath, "Data.csv");
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+                CSVHelper.Write(filePath, accountingInfos);
+                Button_Select.PerformClick();
+            }
+        }
+
+        private void DataGridView_AccountingInfo_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dataGridView = sender as DataGridView;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (!(dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] is DataGridViewImageCell))
+                return;
+            String filePath = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Tag.ToString();
+            if (String.IsNullOrEmpty(filePath))
+                return;
+            if (!File.Exists(filePath))
+                return;
+            ShowImgForm showImgForm = new ShowImgForm(filePath);
+            showImgForm.ShowDialog();
+        }
+
+        private void DataGridView_AccountingInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dataGridView = sender as DataGridView;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (!(dataGridView.DataSource is List<AccountingInfo> accountingInfos))
+                return;
+            DataGridViewRow row = dataGridView.Rows[e.RowIndex];
+            string columnName = dataGridView.Columns[e.ColumnIndex].Name;
+
+            var attribute = typeof(AccountingInfo).GetProperties()
+                .Select(p => p.GetCustomAttribute<GridColumnAttribute>())
+                .FirstOrDefault(attr => attr?.ColumnName == columnName);
+
+            if (attribute?.ColumnType != null)
+            {
+                if (row.Cells[attribute.ColumnName] is DataGridViewComboBoxCell comboBoxCell)
+                {
+                    string valueString = row.Cells[attribute.ColumnName].Value.ToString();
+                    if (ExpenseData.CategoryToPurpose.ContainsKey(valueString))
+                    {
+                        if (row.Cells[attribute.ChildColumnName] is DataGridViewComboBoxCell comboBoxChildCell)
+                        {
+                            comboBoxChildCell.Value = null;
+                            comboBoxChildCell.Items.Clear();
+                            foreach (var item in ExpenseData.CategoryToPurpose[valueString])
+                                comboBoxChildCell.Items.Add(item);
+                            comboBoxChildCell.Value = comboBoxChildCell.Items[0];
+                        }
+                    }
+                }
+            }
+
+            PropertyInfo[] propertyInfos = typeof(AccountingInfo).GetProperties();
+            for (int i = 0; i < propertyInfos.Length; i++)
+            {
+                var attr = propertyInfos[i].GetCustomAttribute<GridColumnAttribute>();
+                if (attr?.ColumnType == null)
+                    continue;
+                String colName = attr?.ColumnName;
+                if (!string.IsNullOrEmpty(colName))
+                    if (dataGridView.Rows[e.RowIndex].Cells[colName] is DataGridViewComboBoxCell)
+                        dataGridView.Rows[e.RowIndex].Cells[propertyInfos[i].Name].Value = dataGridView.Rows[e.RowIndex].Cells[colName].Value;
+            }
+
+            String time = dataGridView.Rows[e.RowIndex].Cells["Time"].Value.ToString();
+            accountingInfos = accountingInfos.Where(x => x.Time == time).ToList();
+            String directoryPath = Path.Combine(ConfigurationManager.AppSettings["FileServerPath"], time);
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
+            string filePath = Path.Combine(directoryPath, "Data.csv");
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            CSVHelper.Write(filePath, accountingInfos);
         }
     }
 }

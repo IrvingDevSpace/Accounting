@@ -14,9 +14,9 @@ namespace Accounting.Contract
 
         public interface IAccountingDataPresenter
         {
-            void GetAccountingInfos(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments);
-            void GetGroupByAmounts(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys);
-            void GetTwoGroupByAmounts(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys);
+            void GetAccountingInfos(SearchDate searchDate);
+            void GetGroupByAmounts(SearchDate searchDate);
+            void GetTwoGroupByAmounts(SearchDate searchDate);
         }
     }
 }

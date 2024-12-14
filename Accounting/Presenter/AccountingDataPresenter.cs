@@ -17,24 +17,24 @@ namespace Accounting.Presenter
             _accountingInfoRepository = new AccountingInfoRepository();
         }
 
-        public void GetAccountingInfos(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments)
+        public void GetAccountingInfos(SearchDate searchDate)
         {
-            List<AccountingInfo> accountingInfos = _accountingInfoRepository.GetAccountingInfos(searchDate, purposes, companions, payments);
+            List<AccountingInfo> accountingInfos = _accountingInfoRepository.GetAccountingInfos(searchDate);
             _accountingDataView.RenderAccountingInfos(accountingInfos);
         }
 
-        public void GetGroupByAmounts(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys)
+        public void GetGroupByAmounts(SearchDate searchDate)
         {
-            List<GroupByAmount> groupByAmounts = _accountingInfoRepository.GetGroupByAmounts(searchDate, purposes, companions, payments, orderBys);
+            List<GroupByAmount> groupByAmounts = _accountingInfoRepository.GetGroupByAmounts(searchDate);
             _accountingDataView.RenderGroupByAmounts(groupByAmounts);
         }
 
-        public void GetTwoGroupByAmounts(SearchDate searchDate, List<string> purposes, List<string> companions, List<string> payments, Dictionary<string, bool> orderBys)
+        public void GetTwoGroupByAmounts(SearchDate searchDate)
         {
-            List<GroupByAmount> groupByAmounts1 = _accountingInfoRepository.GetGroupByAmounts(searchDate, purposes, companions, payments, orderBys);
+            List<GroupByAmount> groupByAmounts1 = _accountingInfoRepository.GetGroupByAmounts(searchDate);
             searchDate.StartTime = searchDate.StartTime.AddMonths(1);
             searchDate.EndTime = searchDate.EndTime.AddMonths(1);
-            List<GroupByAmount> groupByAmounts2 = _accountingInfoRepository.GetGroupByAmounts(searchDate, purposes, companions, payments, orderBys);
+            List<GroupByAmount> groupByAmounts2 = _accountingInfoRepository.GetGroupByAmounts(searchDate);
             groupByAmounts1.AddRange(groupByAmounts2);
             _accountingDataView.RenderGroupByAmounts(groupByAmounts1);
         }

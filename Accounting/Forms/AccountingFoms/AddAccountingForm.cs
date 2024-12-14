@@ -44,11 +44,11 @@ namespace Accounting.Forms.AccountingFoms
             this.Controls.Add(navbar);
             this.SetFormsNavbarButton();
 
-            foreach (var type in ExpenseData.Types.Keys)
+            foreach (var type in ExpenseData.Datas["類型"])
                 ComboBox_Type.Items.Add(type);
-            foreach (var companion in ExpenseData.Companions)
+            foreach (var companion in ExpenseData.Datas["對象"])
                 ComboBox_Companion.Items.Add(companion);
-            foreach (var payment in ExpenseData.Payments)
+            foreach (var payment in ExpenseData.Datas["付款方式"])
                 ComboBox_Payment.Items.Add(payment);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -63,7 +63,7 @@ namespace Accounting.Forms.AccountingFoms
         {
             ComboBox comboBox = (ComboBox)sender;
             String typeName = comboBox.Text;
-            if (!ExpenseData.Types.TryGetValue(typeName, out List<string> values))
+            if (!ExpenseData.CategoryToPurpose.TryGetValue(typeName, out List<string> values))
                 return;
             ComboBox_Purpose.Items.Clear();
             foreach (var value in values)

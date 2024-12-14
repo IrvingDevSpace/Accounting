@@ -251,7 +251,7 @@
     <Compile Include="ShowImgForm.Designer.cs">
       <DependentUpon>ShowImgForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\AddAccountingInfo.cs" />
+    <Compile Include="Models\AccountingInfo.cs" />
     <Compile Include="Attributes\NavbarAttribute.cs" />
     <Compile Include="SingletonUtils\Singleton.cs" />
     <Compile Include="Program.cs" />

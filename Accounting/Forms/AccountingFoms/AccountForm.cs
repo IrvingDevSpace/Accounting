@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using static Accounting.Contract.AccountingDataContract;
 
 namespace Accounting.Forms.AccountingFoms
@@ -40,7 +41,7 @@ namespace Accounting.Forms.AccountingFoms
         {
             navbar = new Navbar
             {
-                Location = new System.Drawing.Point(623, 363),
+                Location = new System.Drawing.Point(11, 361),
                 Name = "Navbar_ChangeForm",
                 Size = new System.Drawing.Size(550, 70)
             };
@@ -61,128 +62,34 @@ namespace Accounting.Forms.AccountingFoms
 
         private void DataGridView_AccountingInfo_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridView dataGridView = sender as DataGridView;
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
-            if (!(dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] is DataGridViewImageCell))
-                return;
-            String filePath = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Tag.ToString();
-            if (String.IsNullOrEmpty(filePath))
-                return;
-            if (!File.Exists(filePath))
-                return;
-            ShowImgForm showImgForm = new ShowImgForm(filePath);
-            showImgForm.ShowDialog();
-        }
 
-        String fileServerPath = "C:\\Users\\IRVING\\Program Course\\Code\\Accounting\\FileServer\\";
+        }
 
         private void DataGridView_AccountingInfo_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridView dataGridView = sender as DataGridView;
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
-            if (dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] is DataGridViewButtonCell btn)
-            {
-                String time = dataGridView.Rows[e.RowIndex].Cells[0].Value.ToString();
-                List<AccountingInfo> AccountingInfos = dataGridView.DataSource as List<AccountingInfo>;
-                dataGridView.Init();
-                AccountingInfos.RemoveAt(e.RowIndex);
-                AccountingInfos = AccountingInfos.Where(x => x.Time == time).ToList();
-                String directoryPath = Path.GetDirectoryName($"{fileServerPath}\\{time}\\");
-                if (!Directory.Exists(directoryPath))
-                    Directory.CreateDirectory(directoryPath);
-                if (File.Exists($"{directoryPath}\\Data.csv"))
-                    File.Delete($"{directoryPath}\\Data.csv");
-                CSVHelper.Write($"{directoryPath}\\Data.csv", AccountingInfos);
-                Button_Select.PerformClick();
-            }
         }
 
         private void DataGridView_AccountingInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            //DataGridView dataGridView = sender as DataGridView;
-            //if (e.RowIndex < 0 || e.ColumnIndex < 0)
-            //    return;
-            //if (!(dataGridView.DataSource is List<AccountingInfo> AccountingInfos))
-            //    return;
-            //string columnName = dataGridView.Columns[e.ColumnIndex].Name;
-            //if (columnName == "comboBoxColumnType")
-            //{
-            //    if (dataGridView.Rows[e.RowIndex].Cells["comboBoxColumnPurpose"] is DataGridViewComboBoxCell comboBoxPurposeCell)
-            //    {
-            //        comboBoxPurposeCell.Value = null;
-            //        comboBoxPurposeCell.Items.Clear();
-            //        if (ExpenseData.Types.TryGetValue(dataGridView.Rows[e.RowIndex].Cells[columnName].Value.ToString(), out List<string> values))
-            //        {
-            //            comboBoxPurposeCell.Items.Clear();
-            //            foreach (var value in values)
-            //                comboBoxPurposeCell.Items.Add(value);
-            //            comboBoxPurposeCell.Value = comboBoxPurposeCell.Items[0];
-            //            dataGridView.Rows[e.RowIndex].Cells["Purpose"].Value = comboBoxPurposeCell.Value;
-            //        }
-            //    }
-            //}
-
-            //PropertyInfo[] propertyInfos = typeof(AccountingInfo).GetProperties();
-            //for (int i = 0; i < propertyInfos.Length; i++)
-            //{
-            //    String description = propertyInfos[i].GetCustomAttribute<DescriptionAttribute>()?.Description;
-            //    if (description != null)
-            //    {
-            //        if (description == columnName)
-            //        {
-            //            dataGridView.Rows[e.RowIndex].Cells[propertyInfos[i].Name].Value = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-            //            break;
-            //        }
-            //    }
-            //}
-
-            //String time = dataGridView.Rows[e.RowIndex].Cells["Time"].Value.ToString();
-            //AccountingInfos = AccountingInfos.Where(x => x.Time == time).ToList();
-            //String directoryPath = Path.GetDirectoryName($"{fileServerPath}\\{time}\\");
-            //if (!Directory.Exists(directoryPath))
-            //    Directory.CreateDirectory(directoryPath);
-            //if (File.Exists($"{directoryPath}\\Data.csv"))
-            //    File.Delete($"{directoryPath}\\Data.csv");
-            //CSVHelper.Write($"{directoryPath}\\Data.csv", AccountingInfos);
         }
 
         private void Start()
         {
-            this.Invoke(new Action(() =>
-            {
-                SearchDate searchDate = new SearchDate
-                {
-                    StartTime = DateTimePicker_Start.Value,
-                    EndTime = DateTimePicker_End.Value
-                };
-            }));
         }
 
-        void IAccountingDataView.RenderAccountingInfos(List<AccountingInfo> AccountingInfos)
+        public void RenderAccountingInfos(List<AccountingInfo> AccountingInfos)
         {
-
-        }
-
-        List<Expression<Func<AccountingInfo, bool>>> conditions = new List<Expression<Func<AccountingInfo, bool>>>();
-        private void CheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-        }
-
-        private void CheckBoxOrderby_CheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox checkBox = (CheckBox)sender;
-            string text = checkBox.Text;
-            ExpenseData.OrderBys[text] = checkBox.Checked;
+            throw new NotImplementedException();
         }
 
         void IAccountingDataView.RenderGroupByAmounts(List<GroupByAmount> groupByAmounts)
         {
-            DataGridView_AccountingInfo.Init();
-            if (groupByAmounts == null)
-                return;
-            DataGridView_AccountingInfo.DataSource = groupByAmounts;
+            throw new NotImplementedException();
+        }
+
+        public void RenderChart(Chart chart)
+        {
+            throw new NotImplementedException();
         }
     }
 }

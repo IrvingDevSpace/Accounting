@@ -3,14 +3,19 @@ using Accounting.Components;
 using Accounting.Extension;
 using Accounting.Models;
 using Accounting.Presenter;
-
+using CSV;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Xml.Linq;
 using static Accounting.Contract.AccountingDataContract;
 
 namespace Accounting.Forms.AccountingFoms
@@ -48,17 +53,12 @@ namespace Accounting.Forms.AccountingFoms
             };
             this.Controls.Add(navbar);
             this.SetFormsNavbarButton();
+            CreateWhereCheckBoxes(FLP_Where);
+            CreateOrderByCheckBoxes(FLP_OrderBy);
             List<string> strings = new List<string>
             {
-                "Pie", "Stack", "Line"
+                "Pie", "Stacked", "Line"
             };
-
-            //Chart chart = CreatePieChart();
-            //Chart chart = CreateStackedChart();
-            //Chart chart = CreateLineChart();
-            chartDictionary.Add("Pie", CreatePieChart);
-            chartDictionary.Add("Stack", CreateStackedChart);
-            chartDictionary.Add("Line", CreateLineChart);
             comboBox1.Items.AddRange(strings.ToArray());
             comboBox1.SelectedIndex = 0;
         }
@@ -67,246 +67,9 @@ namespace Accounting.Forms.AccountingFoms
         {
             Environment.Exit(0);
         }
-
-        private Chart CreatePieChart(List<GroupByAmount> groupByAmounts)
-        {
-            Chart pieChart = new Chart();
-            pieChart.Dock = DockStyle.Fill;
-
-            ChartArea chartArea = new ChartArea();
-            pieChart.ChartAreas.Add(chartArea);
-
-            Series series = new Series
-            {
-                ChartType = SeriesChartType.Pie,
-                Name = "DataSeries"
-            };
-            pieChart.Series.Add(series);
-
-            foreach (GroupByAmount amount in groupByAmounts)
-                series.Points.AddXY(amount.GroupKey, amount.Amount);
-
-            // 設定標籤
-            // #PERCENT	顯示該數據點的百分比，例如 50%。
-            // #VAL	顯示該數據點的值，例如 40。
-            // #VALX	顯示該數據點的 X 軸值（類別名稱）。
-            // #SERIESNAME	顯示系列名稱（Series 的 Name）。
-            // #LEGENDTEXT	顯示對應圖例的文字（通常是 X 軸值）。
-            // #INDEX	顯示數據點的索引，例如 0, 1, 2 等。
-
-            series.Label = "#VAL / #PERCENT{P0}"; // 百分比格式
-            //series.Label = "#VAL"; 
-            series.LegendText = "#VALX";
-            series.LabelForeColor = System.Drawing.Color.Black;
-            series["PieLabelStyle"] = "Outside";
-            series["PieLineColor"] = "Blue";
-
-            Legend legend = new Legend
-            {
-                Docking = Docking.Right
-            };
-            pieChart.Legends.Add(legend);
-            return pieChart;
-        }
-
-        private Chart CreateStackedChart(List<GroupByAmount> groupByAmounts)
-        {
-            List<float> floats = new List<float>
-            {
-                0, 0, 0
-            };
-
-            Chart stackedChart = new Chart();
-            stackedChart.Dock = DockStyle.Fill;
-
-            ChartArea chartArea = new ChartArea("StackedArea");
-            chartArea.AxisX.Title = "分類";
-            chartArea.AxisY.Title = "百分比 (%)";
-            chartArea.AxisY.Minimum = 0;
-            chartArea.AxisY.Maximum = 100;
-            stackedChart.ChartAreas.Add(chartArea);
-
-            List<Series> seriesList = new List<Series>();
-            int total = 0;
-            for (int i = 0; i < groupByAmounts.Count; i++)
-            {
-                Series series = new Series
-                {
-                    ChartType = SeriesChartType.StackedColumn100,
-                    Name = $"{groupByAmounts[i].GroupKey}",
-                    Color = GetRandomColor()
-                };
-                series.Points.AddXY(groupByAmounts[i].GroupKey, groupByAmounts[i].Amount);
-                series.LabelForeColor = Color.White;
-                floats[0] += groupByAmounts[i].Amount;
-                total += groupByAmounts[i].Amount;
-                stackedChart.Series.Add(series);
-            }
-
-            foreach (var series in stackedChart.Series)
-            {
-                for (int i = 0; i < series.Points.Count; i++)
-                {
-                    double percentage = series.Points[i].YValues[0] / floats[i];
-                    series.Points[i].Label = percentage.ToString("P");
-                }
-            }
-
-            Legend legend = new Legend
-            {
-                Docking = Docking.Top
-            };
-            stackedChart.Legends.Add(legend);
-            return stackedChart;
-        }
-
-        private Chart CreateLineChart(List<GroupByAmount> groupByAmounts)
-        {
-            Chart lineChart = new Chart();
-            lineChart.Dock = DockStyle.Fill;
-
-            ChartArea chartArea = new ChartArea("LineArea");
-            chartArea.AxisX.Title = "時間";
-            chartArea.AxisY.Title = "數值";
-            lineChart.ChartAreas.Add(chartArea);
-
-            int count = groupByAmounts.Count / 2;
-            for (int i = 0; i < count; i++)
-            {
-                Series series = new Series
-                {
-                    ChartType = SeriesChartType.Line,
-                    Name = groupByAmounts[i].GroupKey,
-                    BorderWidth = 2,
-                    Color = GetRandomColor()
-                };
-                lineChart.Series.Add(series);
-
-                series.Points.AddXY(groupByAmounts[i].GroupKey, groupByAmounts[i].Amount);
-            }
-
-            for (int i = count; i < groupByAmounts.Count; i++)
-            {
-                bool hasSeries = lineChart.Series.ToList().Any(x => x.Name == groupByAmounts[i].GroupKey);
-                if (!hasSeries)
-                {
-                    Series series = new Series
-                    {
-                        ChartType = SeriesChartType.Line,
-                        Name = groupByAmounts[i].GroupKey,
-                        BorderWidth = 2,
-                        Color = GetRandomColor()
-                    };
-                    lineChart.Series.Add(series);
-                }
-                lineChart.Series[groupByAmounts[i].GroupKey].Points.AddXY(groupByAmounts[i].GroupKey, groupByAmounts[i].Amount);
-            }
-
-
-            Legend legend = new Legend
-            {
-                Docking = Docking.Top
-            };
-            lineChart.Legends.Add(legend);
-
-            return lineChart;
-        }
-
-        //private Chart CreateStackedChart(List<GroupByAmount> groupByAmounts)
-        //{
-        //    List<float> floats = new List<float>
-        //    {
-        //        0, 0, 0
-        //    };
-
-        //    Chart stackedChart = new Chart();
-        //    stackedChart.Dock = DockStyle.Fill;
-
-        //    ChartArea chartArea = new ChartArea("StackedArea");
-        //    chartArea.AxisX.Title = "分類";
-        //    chartArea.AxisY.Title = "百分比 (%)";
-        //    chartArea.AxisY.Minimum = 0;
-        //    chartArea.AxisY.Maximum = 100;
-        //    stackedChart.ChartAreas.Add(chartArea);
-
-        //    foreach (var amount in groupByAmounts)
-        //    {
-
-        //    }
-
-        //    Series series1 = new Series
-        //    {
-        //        ChartType = SeriesChartType.StackedColumn100,
-        //        Name = "數據 1",
-        //        Color = System.Drawing.Color.Blue
-        //    };
-        //    stackedChart.Series.Add(series1);
-
-        //    series1.Points.AddXY("分類 A", 10);
-        //    floats[0] += 10;
-        //    series1.Points.AddXY("分類 B", 20);
-        //    floats[1] += 20;
-        //    series1.Points.AddXY("分類 C", 15);
-        //    floats[2] += 15;
-
-        //    series1.LabelForeColor = System.Drawing.Color.White;
-
-        //    Series series2 = new Series
-        //    {
-        //        ChartType = SeriesChartType.StackedColumn100,
-        //        Name = "數據集 2",
-        //        Color = System.Drawing.Color.Red
-        //    };
-        //    stackedChart.Series.Add(series2);
-
-        //    series2.Points.AddXY("分類 A", 5);
-        //    floats[0] += 5;
-        //    series2.Points.AddXY("分類 B", 10);
-        //    floats[1] += 10;
-        //    series2.Points.AddXY("分類 C", 20);
-        //    floats[2] += 20;
-
-        //    series2.LabelForeColor = System.Drawing.Color.White;
-
-        //    Series series3 = new Series
-        //    {
-        //        ChartType = SeriesChartType.StackedColumn100,
-        //        Name = "數據 3",
-        //        Color = System.Drawing.Color.Green
-        //    };
-        //    stackedChart.Series.Add(series3);
-
-        //    series3.Points.AddXY("分類 A", 15);
-        //    floats[0] += 15;
-        //    series3.Points.AddXY("分類 B", 5);
-        //    floats[1] += 5;
-        //    series3.Points.AddXY("分類 C", 10);
-        //    floats[2] += 10;
-
-        //    series3.LabelForeColor = System.Drawing.Color.White;
-
-        //    foreach (var series in stackedChart.Series)
-        //    {
-        //        for (int i = 0; i < series.Points.Count; i++)
-        //        {
-        //            double percentage = series.Points[i].YValues[0] / floats[i];
-        //            series.Points[i].Label = percentage.ToString("P");
-        //        }
-        //    }
-
-        //    Legend legend = new Legend
-        //    {
-        //        Docking = Docking.Top
-        //    };
-        //    stackedChart.Legends.Add(legend);
-        //    return stackedChart;
-        //}
-
-        Dictionary<string, Func<List<GroupByAmount>, Chart>> chartDictionary = new Dictionary<string, Func<List<GroupByAmount>, Chart>>();
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            panel1.Controls.Clear();
-            panel1.Controls.Add(chartDictionary[comboBox1.Text](_groupByAmounts));
+            this.SetDebounceTime(Start, 200);
         }
 
         private void Button_Select_Click(object sender, EventArgs e)
@@ -318,25 +81,53 @@ namespace Accounting.Forms.AccountingFoms
         {
             this.Invoke(new Action(() =>
             {
+                panel1.Controls.Clear();
+                DataGridView_AccountingInfo.Init();
                 SearchDate searchDate = new SearchDate
                 {
-                    StartTime = DateTimePicker_Start.Value,
-                    EndTime = DateTimePicker_End.Value
+                    StartTime = DateTimePicker_Start.Value.Date,
+                    EndTime = DateTimePicker_End.Value.Date
                 };
-                //if (ExpenseData.OrderBys.Values.Any(x => x))
-                //{
-
-                //    if (comboBox1.Text == "Line")
-                //        _accountingDataPresenter.GetTwoGroupByAmounts(searchDate, purpose, companions, payments, ExpenseData.OrderBys);
-                //    else
-                //        _accountingDataPresenter.GetGroupByAmounts(searchDate, purpose, companions, payments, ExpenseData.OrderBys);
-                //}
-                //else
-                //    _accountingDataPresenter.GetAccountingInfos(searchDate, purpose, companions, payments);
+                if (ExpenseData.OrderBys.Values.Any(x => x))
+                {
+                    _accountingDataPresenter.GetGroupByAmounts(searchDate);
+                    _accountingDataPresenter.GetChart(searchDate, comboBox1.Text);
+                }
+                else
+                    _accountingDataPresenter.GetAccountingInfos(searchDate);
             }));
         }
+        private void CreateWhereCheckBoxes(FlowLayoutPanel flowLayoutPanel)
+        {
+            foreach (var key in ExpenseData.Datas.Keys)
+            {
+                List<CheckBox> checkBoxes = new List<CheckBox>();
+                FlowLayoutPanel panel = new FlowLayoutPanel { AutoSize = true };
+                CheckBox keyCheckBox = new CheckBox { Text = key, AutoSize = true };
+                keyCheckBox.CheckedChanged += CheckBox_AllCheckedChanged;
+                checkBoxes.Add(keyCheckBox);
+                foreach (var item in ExpenseData.Datas[key])
+                {
+                    CheckBox valCheckBox = new CheckBox { Text = item, AutoSize = true, Tag = key };
+                    valCheckBox.CheckedChanged += CheckBox_CheckedChanged;
+                    checkBoxes.Add(valCheckBox);
+                }
+                panel.Controls.AddRange(checkBoxes.ToArray());
+                flowLayoutPanel.Controls.Add(panel);
+            }
+        }
 
-        List<Expression<Func<AccountingInfo, bool>>> conditions = new List<Expression<Func<AccountingInfo, bool>>>();
+        private void CreateOrderByCheckBoxes(FlowLayoutPanel flowLayoutPanel)
+        {
+            FlowLayoutPanel panel = new FlowLayoutPanel { AutoSize = true };
+            foreach (var orderBy in ExpenseData.OrderBys)
+            {
+                CheckBox keyCheckBox = new CheckBox { Text = orderBy.Key, AutoSize = true };
+                keyCheckBox.CheckedChanged += CheckBoxOrderby_CheckedChanged;
+                panel.Controls.Add(keyCheckBox);
+            }
+            flowLayoutPanel.Controls.Add(panel);
+        }
 
         private void CheckBox_AllCheckedChanged(object sender, EventArgs e)
         {
@@ -346,36 +137,16 @@ namespace Accounting.Forms.AccountingFoms
                 item.Checked = checkBox.Checked;
         }
 
-        List<string> purpose = new List<string>();
-
-        private void CheckBox_PurposeCheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox checkBox = (CheckBox)sender;
-            if (checkBox.Checked)
-                purpose.Add(checkBox.Text);
-            else
-                purpose.Remove(checkBox.Text);
-        }
-
-        List<string> companions = new List<string>();
-        List<string> payments = new List<string>();
-
         private void CheckBox_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox checkBox = (CheckBox)sender;
-            if (checkBox.Checked)
+            if (checkBox.Tag is string tag && ExpenseData.CategoryLists.ContainsKey(tag))
             {
-                if (checkBox.Tag.ToString() == "對象")
-                    companions.Add(checkBox.Text);
-                if (checkBox.Tag.ToString() == "付款方式")
-                    payments.Add(checkBox.Text);
-            }
-            else
-            {
-                if (checkBox.Tag.ToString() == "對象")
-                    companions.Remove(checkBox.Text);
-                if (checkBox.Tag.ToString() == "付款方式")
-                    payments.Remove(checkBox.Text);
+                List<string> list = ExpenseData.CategoryLists[tag];
+                if (checkBox.Checked)
+                    list.Add(checkBox.Text);
+                else
+                    list.Remove(checkBox.Text);
             }
         }
 
@@ -386,31 +157,211 @@ namespace Accounting.Forms.AccountingFoms
             ExpenseData.OrderBys[text] = checkBox.Checked;
         }
 
-        void IAccountingDataView.RenderAccountingInfos(List<AccountingInfo> AccountingInfos)
+        private void DataGridView_AccountingInfo_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            DataGridView dataGridView = sender as DataGridView;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] is DataGridViewButtonCell btn)
+            {
+                String time = dataGridView.Rows[e.RowIndex].Cells[0].Value.ToString();
+                List<AccountingInfo> accountingInfos = dataGridView.DataSource as List<AccountingInfo>;
+                dataGridView.Init();
+                accountingInfos.RemoveAt(e.RowIndex);
+                accountingInfos = accountingInfos.Where(x => x.Time == time).ToList();
+                String directoryPath = Path.Combine(ConfigurationManager.AppSettings["FileServerPath"], time);
+                if (!Directory.Exists(directoryPath))
+                    Directory.CreateDirectory(directoryPath);
+                string filePath = Path.Combine(directoryPath, "Data.csv");
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+                CSVHelper.Write(filePath, accountingInfos);
+                Button_Select.PerformClick();
+            }
+        }
 
+        private void DataGridView_AccountingInfo_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dataGridView = sender as DataGridView;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (!(dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] is DataGridViewImageCell))
+                return;
+            String filePath = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Tag.ToString();
+            if (String.IsNullOrEmpty(filePath))
+                return;
+            if (!File.Exists(filePath))
+                return;
+            ShowImgForm showImgForm = new ShowImgForm(filePath);
+            showImgForm.ShowDialog();
+        }
+
+        private void DataGridView_AccountingInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dataGridView = sender as DataGridView;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (!(dataGridView.DataSource is List<AccountingInfo> accountingInfos))
+                return;
+            DataGridViewRow row = dataGridView.Rows[e.RowIndex];
+            string columnName = dataGridView.Columns[e.ColumnIndex].Name;
+
+            var attribute = typeof(AccountingInfo).GetProperties()
+                .Select(p => p.GetCustomAttribute<GridColumnAttribute>())
+                .FirstOrDefault(attr => attr?.ColumnName == columnName);
+
+            if (attribute?.ColumnType != null)
+            {
+                if (row.Cells[attribute.ColumnName] is DataGridViewComboBoxCell comboBoxCell)
+                {
+                    string valueString = row.Cells[attribute.ColumnName].Value.ToString();
+                    if (ExpenseData.CategoryToPurpose.ContainsKey(valueString))
+                    {
+                        if (row.Cells[attribute.ChildColumnName] is DataGridViewComboBoxCell comboBoxChildCell)
+                        {
+                            comboBoxChildCell.Value = null;
+                            comboBoxChildCell.Items.Clear();
+                            foreach (var item in ExpenseData.CategoryToPurpose[valueString])
+                                comboBoxChildCell.Items.Add(item);
+                            comboBoxChildCell.Value = comboBoxChildCell.Items[0];
+                        }
+                    }
+                }
+            }
+
+            PropertyInfo[] propertyInfos = typeof(AccountingInfo).GetProperties();
+            for (int i = 0; i < propertyInfos.Length; i++)
+            {
+                var attr = propertyInfos[i].GetCustomAttribute<GridColumnAttribute>();
+                if (attr?.ColumnType == null)
+                    continue;
+                String colName = attr?.ColumnName;
+                if (!string.IsNullOrEmpty(colName))
+                    if (dataGridView.Rows[e.RowIndex].Cells[colName] is DataGridViewComboBoxCell)
+                        dataGridView.Rows[e.RowIndex].Cells[propertyInfos[i].Name].Value = dataGridView.Rows[e.RowIndex].Cells[colName].Value;
+            }
+
+            String time = dataGridView.Rows[e.RowIndex].Cells["Time"].Value.ToString();
+            accountingInfos = accountingInfos.Where(x => x.Time == time).ToList();
+            String directoryPath = Path.Combine(ConfigurationManager.AppSettings["FileServerPath"], time);
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
+            string filePath = Path.Combine(directoryPath, "Data.csv");
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            CSVHelper.Write(filePath, accountingInfos);
+        }
+
+        void IAccountingDataView.RenderAccountingInfos(List<AccountingInfo> accountingInfos)
+        {
+            DataGridView_AccountingInfo.Init();
+            if (accountingInfos == null)
+                return;
+            DataGridView_AccountingInfo.DataSource = accountingInfos;
+
+            var type = typeof(AccountingInfo);
+            var properties = type.GetProperties();
+
+            foreach (var prop in properties)
+            {
+                var columnName = prop.Name;
+                var column = DataGridView_AccountingInfo.Columns[columnName];
+
+                if (column == null) continue;
+
+                // 檢查 GridColumn 屬性
+                var gridColumnAttr = prop.GetCustomAttribute<GridColumnAttribute>();
+                var displayNameColumnAttr = prop.GetCustomAttribute<DisplayNameAttribute>();
+                string headerText = displayNameColumnAttr?.DisplayName ?? prop.Name;
+                if (gridColumnAttr != null)
+                {
+                    DataGridViewColumn newColumn;
+                    column.ReadOnly = gridColumnAttr.ReadOnly;
+                    column.Visible = gridColumnAttr.Visible;
+                    if (gridColumnAttr.ColumnType == null) continue;
+                    newColumn = (DataGridViewColumn)Activator.CreateInstance(gridColumnAttr.ColumnType);
+                    newColumn.Name = gridColumnAttr.ColumnName;
+                    newColumn.HeaderText = headerText;
+                    newColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    // 處理 ComboBox 的資料來源
+                    if (newColumn is DataGridViewComboBoxColumn comboBoxColumn && !string.IsNullOrEmpty(headerText))
+                    {
+                        comboBoxColumn.Items.AddRange(ExpenseData.Datas[headerText].ToArray());
+                    }
+                    if (newColumn is DataGridViewImageColumn imageColumn)
+                    {
+                        imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
+                        imageColumn.ReadOnly = true; // 圖片列通常為只讀
+                    }
+                    DataGridView_AccountingInfo.Columns.Add(newColumn);
+                }
+            }
+
+            DataGridViewButtonColumn btnDeleteCol = new DataGridViewButtonColumn();
+            btnDeleteCol.Name = "Delete";
+            btnDeleteCol.HeaderText = "刪除";
+            btnDeleteCol.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;   //置中
+            DataGridView_AccountingInfo.Columns.Add(btnDeleteCol);
+
+            for (int i = 0; i < accountingInfos.Count; i++)
+            {
+                var row = DataGridView_AccountingInfo.Rows[i];
+                foreach (var property in properties)
+                {
+                    var attribute = property.GetCustomAttribute<GridColumnAttribute>();
+                    if (attribute?.ColumnType == null)
+                        continue;
+                    var value = property.GetValue(accountingInfos[i]);
+                    if (row.Cells[attribute.ColumnName] is DataGridViewComboBoxCell comboBoxCell)
+                    {
+                        string valueString = value.ToString();
+                        comboBoxCell.Value = valueString;
+                        if (!ExpenseData.CategoryToPurpose.ContainsKey(valueString))
+                            continue;
+                        if (row.Cells[attribute.ChildColumnName] is DataGridViewComboBoxCell comboBoxChildCell)
+                        {
+                            comboBoxChildCell.Value = null;
+                            comboBoxChildCell.Items.Clear();
+                            foreach (var item in ExpenseData.CategoryToPurpose[valueString])
+                                comboBoxChildCell.Items.Add(item);
+                            comboBoxChildCell.Value = comboBoxChildCell.Items[0];
+                        }
+                    }
+                    else if (row.Cells[attribute.ColumnName] is DataGridViewImageCell imageCell)
+                    {
+                        if (!File.Exists(value?.ToString()))
+                            continue;
+                        imageCell.Value = Image.FromFile(value.ToString());
+                        var compressionPath = property.GetCustomAttribute<GridColumnAttribute>()?.ImagePathCompression;
+                        if (!string.IsNullOrEmpty(compressionPath))
+                        {
+                            var compressionValue = type.GetProperty(compressionPath)?.GetValue(accountingInfos[i]);
+                            imageCell.Tag = compressionValue;
+                        }
+                    }
+                    else
+                        row.Cells[attribute.ColumnName].Value = value;
+                }
+                if (row.Cells["Delete"] is DataGridViewButtonCell buttonDeleteCell)
+                    buttonDeleteCell.Value = "刪除";
+            }
+            DataGridView_AccountingInfo.ClearSelection();
+            Console.WriteLine(1);
         }
 
         void IAccountingDataView.RenderGroupByAmounts(List<GroupByAmount> groupByAmounts)
         {
             _groupByAmounts = groupByAmounts;
-
-            panel1.Controls.Clear();
-            panel1.Controls.Add(chartDictionary[comboBox1.Text](_groupByAmounts));
             DataGridView_AccountingInfo.Init();
             if (groupByAmounts == null)
                 return;
             DataGridView_AccountingInfo.DataSource = groupByAmounts;
         }
-        Random random = new Random();
-        Color GetRandomColor()
+
+        public void RenderChart(Chart chart)
         {
-
-            int r = random.Next(0, 256); // 0 到 255 的隨機值
-            int g = random.Next(0, 256);
-            int b = random.Next(0, 256);
-
-            return Color.FromArgb(r, g, b);
+            panel1.Controls.Clear();
+            panel1.Controls.Add(chart);
         }
     }
 }

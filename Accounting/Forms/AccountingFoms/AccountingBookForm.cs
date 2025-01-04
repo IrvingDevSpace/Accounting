@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using static Accounting.Contract.AccountingDataContract;
 
 namespace Accounting.Forms.AccountingFoms
@@ -285,6 +286,11 @@ namespace Accounting.Forms.AccountingFoms
         }
 
         public void RenderAccountingInfos(List<AccountingInfo> AccountingInfos)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RenderChart(Chart chart)
         {
             throw new NotImplementedException();
         }

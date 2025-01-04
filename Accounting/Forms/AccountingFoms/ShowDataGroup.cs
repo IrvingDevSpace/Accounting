@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using static Accounting.Contract.AccountingDataContract;
 
 namespace Accounting.Forms.AccountingFoms
@@ -335,6 +336,11 @@ namespace Accounting.Forms.AccountingFoms
             if (File.Exists(filePath))
                 File.Delete(filePath);
             CSVHelper.Write(filePath, accountingInfos);
+        }
+
+        public void RenderChart(Chart chart)
+        {
+            throw new NotImplementedException();
         }
     }
 }

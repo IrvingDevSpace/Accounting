@@ -1,5 +1,6 @@
 ﻿using Accounting.Models;
 using System.Collections.Generic;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace Accounting.Contract
 {
@@ -9,6 +10,7 @@ namespace Accounting.Contract
         {
             void RenderAccountingInfos(List<AccountingInfo> AccountingInfos);
             void RenderGroupByAmounts(List<GroupByAmount> groupByAmounts);
+            void RenderChart(Chart chart);
         }
 
 
@@ -17,6 +19,7 @@ namespace Accounting.Contract
             void GetAccountingInfos(SearchDate searchDate);
             void GetGroupByAmounts(SearchDate searchDate);
             void GetTwoGroupByAmounts(SearchDate searchDate);
+            void GetChart(SearchDate searchDate, string chartType);
         }
     }
 }
